@@ -95,29 +95,6 @@ Open the local URL (usually `http://localhost:8501`) in your browser to interact
 
 ---
 
-## 🔬 Quantitative Methodology & Interview Defense
-
-Every statistical metric, Value at Risk boundary, and machine learning parameter in this repository was **computed from the raw transactional datasets**. You can technically defend the validity and mathematical rigor of these results using the following briefings during interviews:
-
-### 1. How did we achieve 85.0% Accuracy & 0.90 ROC-AUC?
-*   **Target Definition:** The target variable is the binary `win_flag` representing whether a realized closed transaction was profitable (`Closed PnL > 0`).
-*   **Features Used:** The `RandomForestClassifier` was trained on trade-level features including effective leverage, position notional size (`Size USD`), trade execution direction (`Long` vs `Short`), execution hour of the day (capturing funding rate windows and session open liquidity), and the daily Bitcoin Fear & Greed Index score.
-*   **Predictive Strengths:** Feature importance analysis indicated that Bitcoin Fear & Greed Index scores and execution timing were among the strongest predictors of realized trade profitability, highlighting that macro sentiment regimes and market execution timing dominate retail trader success in perpetual markets.
-
-### 2. How was Data Leakage prevented?
-*   **Train-Test Splitting:** The realized transaction fills were split into **70% Training** and **30% Testing** sets using stratified sampling on the `win_flag` to preserve the binary target distribution across both subsets.
-*   **No Look-Ahead Bias:** Sentiment index values are daily lagged relative to execution timestamps. No future trader fills, average returns, or future sentiment indices were included in the features. The modeling pipeline was designed to minimize look-ahead bias by restricting features to information available at execution time.
-
-### 3. How was Value at Risk (VaR) computed?
-*   **Historical Simulation Method:** Value at Risk (VaR) was computed using the non-parametric historical simulation method on realized transaction profits/losses.
-*   **Risk Bounds Definition:** For each FGI sentiment bucket, we extracted the distribution of realized dollar profits/losses. The **VaR 95%** represents the 5th percentile of the realized PnL distribution (indicating that 95% of trades had a better outcome), and **VaR 99%** represents the 1st percentile of the realized PnL distribution (indicating that 99% of trades had a better outcome).
-
-### 4. How was Leverage reconstructed?
-*   **Deterministic Modeling:** In the absence of an explicit client-side leverage parameter in public trade fills (since leverage is a client-side setting that is not recorded directly on-chain in public fill logs), we reconstructed the effective trade leverage.
-*   **Risk-Managed Heuristics:** We modeled leverage using standard institutional risk heuristics where leverage is inversely proportional to position notional size (USD) and bounded by asset-specific volatility parameters (e.g., lower leverage caps for volatile altcoins vs. major pairs), replicating realistic exchange margin constraints.
-
----
-
 ## 📈 Core Analytical Insights Summary
 
 ### 1. The 'Smile Curve' Inefficiency
