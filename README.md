@@ -5,12 +5,11 @@
   <img src="https://img.shields.io/badge/Machine%20Learning-scikit--learn-orange.svg" alt="scikit-learn"/>
   <img src="https://img.shields.io/badge/Dashboard-Streamlit-red.svg" alt="Streamlit"/>
   <img src="https://img.shields.io/badge/Data%20Science-Pandas%20%7C%20NumPy-yellow.svg" alt="Data Science"/>
-  <img src="https://img.shields.io/badge/Status-Completed-success.svg" alt="Status"/>
 </div>
 
 <br/>
 
-> **An end-to-end quantitative and behavioral analytics platform** built to uncover how market psychology influences trader profitability, leverage behavior, and execution risk. This project merges the **Bitcoin Fear & Greed Index** with real-world trading activity from the **Hyperliquid Perpetual DEX**.
+ **An end-to-end quantitative and behavioral analytics platform** built to uncover how market psychology influences trader profitability, leverage behavior, and execution risk. This project merges the **Bitcoin Fear & Greed Index** with real-world trading activity from the **Hyperliquid Perpetual DEX**.
 
 ---
 
@@ -51,10 +50,24 @@ By analyzing real historical trades against daily sentiment data, this intellige
 - **Robust Preprocessing**: Harmonizes timestamps, engineers deterministic leverage metrics, calculates ROE, assigns win/loss flags, and handles missing data.
 
 ---
+## Dashboard
+
+<br>
+<img width="1891" height="880" alt="image" src="https://github.com/user-attachments/assets/758ae7be-df0d-4d69-a3d1-364a2a141c23" />
+
+<img width="1910" height="902" alt="image" src="https://github.com/user-attachments/assets/e1770f0b-d037-4f11-b26f-09aba5eea503" />
+
+<img width="1909" height="892" alt="image" src="https://github.com/user-attachments/assets/e6301fb5-c3cf-4f55-ad08-50242590d81f" />
+
+<img width="1906" height="892" alt="image" src="https://github.com/user-attachments/assets/aafd7d80-24eb-4451-8608-75f7154bf07e" />
+
+
+---
+
 
 ## 🗄️ Datasets
 
-This project relies on two primary data sources, provided as part of the **Primetrade.ai** Data Science Assignment:
+This project relies on two primary data sources:
 
 1. **Historical Trader Data from Hyperliquid**
    - **Description**: Contains thousands of individual trades executed on the Hyperliquid Perpetual DEX.
@@ -129,7 +142,3 @@ streamlit run src/dashboard.py
 3. **Asymmetric Tail-Risk**: Positions entered during systematic market panic (**Fear**) demonstrate significantly lower downside **Value-at-Risk (VaR)**, while simultaneously maintaining much stronger risk-adjusted returns and superior profit factors.
 
 ---
-
-<p align="center">
-  <i>Built to drive smarter trading strategies in Web3.</i>
-</p>
