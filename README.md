@@ -5,7 +5,6 @@
   <img src="https://img.shields.io/badge/Machine%20Learning-scikit--learn-orange.svg" alt="scikit-learn"/>
   <img src="https://img.shields.io/badge/Dashboard-Streamlit-red.svg" alt="Streamlit"/>
   <img src="https://img.shields.io/badge/Data%20Science-Pandas%20%7C%20NumPy-yellow.svg" alt="Data Science"/>
-  <img src="https://img.shields.io/badge/Status-Completed-success.svg" alt="Status"/>
 </div>
 
 <br/>
