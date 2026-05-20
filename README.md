@@ -1,138 +1,135 @@
-# Sentiment-Driven Crypto Trading Intelligence System ⚡
+<h1 align="center">⚡ Sentiment-Driven Crypto Intelligence System</h1>
 
-Welcome to the **Sentiment-Driven Crypto Trading Intelligence System**—an end-to-end quantitative data science and behavioral finance project built to explore the structural relationships between market sentiment (Bitcoin Fear & Greed Index) and active trader execution patterns on the **Hyperliquid Perpetual DEX**.
+<div align="center">
+  <img src="https://img.shields.io/badge/Python-3.9+-blue.svg" alt="Python Version"/>
+  <img src="https://img.shields.io/badge/Machine%20Learning-scikit--learn-orange.svg" alt="scikit-learn"/>
+  <img src="https://img.shields.io/badge/Dashboard-Streamlit-red.svg" alt="Streamlit"/>
+  <img src="https://img.shields.io/badge/Data%20Science-Pandas%20%7C%20NumPy-yellow.svg" alt="Data Science"/>
+  <img src="https://img.shields.io/badge/Status-Completed-success.svg" alt="Status"/>
+</div>
 
-**Objective:** The goal of this system is to identify how trader profitability, leverage usage, and behavioral risk change under different Bitcoin market sentiment regimes. By understanding these dynamics, we construct risk-mitigation policies and predictive execution signals.
+<br/>
 
-This repository is designed with a **clean, modular structure**. It analyzes over 211,000 Hyperliquid transaction records across multiple active trader wallets, aligning them with daily market sentiment scores to engineer leverage metrics, run trader profile segmentations, train profitability predictive classifiers, and deploy an interactive dashboard terminal.
+> **An end-to-end quantitative and behavioral analytics platform** built to uncover how market psychology influences trader profitability, leverage behavior, and execution risk. This project merges the **Bitcoin Fear & Greed Index** with real-world trading activity from the **Hyperliquid Perpetual DEX**.
+
+---
+
+## 📖 Project Overview
+
+Understanding the cryptocurrency market requires more than just price analysis—it requires understanding *human psychology*. This project investigates the profound relationship between market sentiment (Fear vs. Greed) and trader behavior. 
+
+By analyzing real historical trades against daily sentiment data, this intelligence system uncovers hidden patterns, such as when traders take on the most risk, when they are most likely to face liquidations, and how institutional trading strategies differ from emotionally-driven retail trading.
+
+---
+
+## ✨ Comprehensive Feature Set
+
+### 1. 🧠 Sentiment-Driven Behavioral Analytics
+- **Sentiment & PnL Correlation**: Analyzes win rates, total realized PnL, and Return on Equity (ROE) across 5 distinct sentiment regimes (Extreme Fear, Fear, Neutral, Greed, Extreme Greed).
+- **Leverage Fallacy Detection**: Identifies how leverage behavior shifts during volatile market conditions and quantifies the amplified downside risk of extreme leverage (21x–50x).
+
+### 2. 📈 Advanced Quantitative Risk Modeling
+- **Value-at-Risk (VaR)**: Calculates 95% and 99% VaR for each sentiment class to mathematically quantify tail-risk during market panics versus euphoric rallies.
+- **Profit Factors & Return Profiles**: Evaluates gross profits relative to gross losses, isolating which market environments generate the most asymmetric, positive expected value (+EV) opportunities.
+
+### 3. 🤖 Machine Learning Implementation
+- **Trader Persona Segmentation (K-Means Clustering)**: Unsupervised learning groups individual accounts into professional archetypes based on their trading statistics:
+  - 🐋 *Institutional Whales* (High volume, high PnL)
+  - 🎰 *High-Leverage Speculators* (Extreme risk, high volatility)
+  - ⚡ *Systematic Scalpers* (High frequency, lower sizing)
+  - 🛡️ *Conservative/Tactical Retail* (Low frequency, tactical entries)
+- **Trade Profitability Prediction (Random Forest Classifier)**: A supervised predictive model trained to forecast whether an individual trade will be profitable based on leverage, trade size, direction, and prevailing market sentiment.
+
+### 4. 📊 Interactive Analytics Dashboard
+- A fully responsive **Streamlit UI** allowing users to interactively slice and dice data. It features:
+  - Visual distribution of leverage across different sentiment states.
+  - Heatmaps for extreme loss events and risk indicators.
+  - Deep-dives into individual trader performance and segmented personas.
+
+### 5. 🚀 Automated ETL Pipeline
+- **Zero-Touch Ingestion**: Automatically downloads raw CSV datasets directly from Google Drive.
+- **Robust Preprocessing**: Harmonizes timestamps, engineers deterministic leverage metrics, calculates ROE, assigns win/loss flags, and handles missing data.
+
+---
+
+## 🗄️ Datasets
+
+This project relies on two primary data sources, provided as part of the **Primetrade.ai** Data Science Assignment:
+
+1. **Historical Trader Data from Hyperliquid**
+   - **Description**: Contains thousands of individual trades executed on the Hyperliquid Perpetual DEX.
+   - **Key Features**: `Account`, `Coin`, `Execution Price`, `Size USD`, `Direction`, `Closed PnL`, `Timestamp`.
+   - 🔗 [Download Raw Dataset (Google Drive)](https://drive.google.com/file/d/1IAfLZwu6rJzyWKgBToqwSmmVYU6VbjVs/view?usp=sharing)
+
+2. **Bitcoin Market Sentiment Dataset**
+   - **Description**: Daily index measuring the emotional state of the crypto market.
+   - **Key Features**: `Date`, `Value (0-100)`, `Classification (Fear/Greed)`.
+   - 🔗 [Download Raw Dataset (Google Drive)](https://drive.google.com/file/d/1PgQC0tO8XN-wqkNyghWc_-mnrYv_nhSf/view?usp=sharing)
+
+---
+
+## 🚀 Quick Start Guide
+
+Run the complete pipeline from raw data extraction to dashboard deployment in **four simple steps**.
+
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Download Raw Datasets
+This script will automatically pull the datasets from the Google Drive links above.
+```bash
+python src/download_data.py
+```
+
+### 3. Process Data & Train Models
+Execute the core analytical engine. This cleans the data, runs the quantitative analyses, and trains the Random Forest and K-Means models. Outputs will be saved to the `data/results/` directory.
+```bash
+python src/data_preprocessing.py
+python src/analytics_engine.py
+python src/ml_engine.py
+```
+
+### 4. Launch Interactive Dashboard
+Fire up the local Streamlit server to visualize the findings.
+```bash
+streamlit run src/dashboard.py
+```
+*The dashboard will automatically open in your default browser at `http://localhost:8501`.*
 
 ---
 
 ## 📂 Project Architecture
 
-```
-├── data/
-│   ├── raw/                 # Raw datasets downloaded from Google Drive
-│   ├── processed/           # Aligned, preprocessed, and feature-engineered CSVs
-│   └── results/             # Aggregated quant outputs, clustering segments, and ML metrics
-├── notebooks/
-│   └── sentiment_trading_analysis.ipynb  # Quantitative research Jupyter Notebook
-├── reports/
-│   └── executive_summary.md # Quantitative research report & strategic recommendations
-├── src/
-│   ├── download_data.py     # ETL: Automated Google Drive data downloader
-│   ├── data_preprocessing.py# ETL: Date harmonization, alignment, and leverage engineering
-│   ├── analytics_engine.py  # Quant: Computes Profit Factors, VaR, correlations, and frequency sizing
-│   ├── ml_engine.py         # ML: Runs K-Means trader clustering & Random Forest profitability modeling
-│   └── dashboard.py         # App: Interactive dark-mode Streamlit Dashboard
-├── requirements.txt         # Project dependency manifest
-└── README.md                # System documentation (This file)
+```text
+📦 sentiment-driven-crypto-intelligence
+├── 📁 data/
+│   ├── raw/                  # Downloaded raw datasets
+│   ├── processed/            # Cleaned & feature-engineered datasets
+│   └── results/              # Exported analytical CSVs and serialized ML models
+├── 📁 notebooks/             # Jupyter notebooks for EDA
+├── 📁 reports/               # Executive summaries
+├── 📁 src/
+│   ├── 📥 download_data.py      # Automated dataset extraction
+│   ├── 🧹 data_preprocessing.py # Data harmonization & deterministic leverage
+│   ├── 🧮 analytics_engine.py   # Quant metrics: VaR, Profit Factors, correlations
+│   ├── 🤖 ml_engine.py          # ML pipelines: K-Means & Random Forest
+│   └── 🖥️ dashboard.py          # Streamlit interactive dashboard
+├── 📄 requirements.txt       # Project dependencies
+└── 📄 README.md              # You are here!
 ```
 
 ---
 
-## 🛠️ Tech Stack & Requirements
+## 📊 Key Findings & Insights
 
-The system is built entirely in **Python** using standard high-performance data libraries:
-- **Core Analytics:** `pandas`, `numpy`
-- **Visualization:** `matplotlib`, `seaborn`, `plotly`
-- **Machine Learning:** `scikit-learn`
-- **Dashboard Application:** `streamlit`
-- **Networking:** `requests`
+1. **The Overconfidence Trap**: Peak trader profitability actually occurs during periods of **Fear** and **Extreme Greed**. Standard **Greed** phases often act as *overconfidence traps*—emotionally-driven FOMO entries that lead to elevated retail losses.
+2. **The Leverage Fallacy**: Low-leverage traders (**1x–3x**) consistently capture the vast majority of aggregate profits. High-leverage trades (**21x–50x**) experience amplified downside risk due to extreme volatility exposure and sudden liquidation cascades.
+3. **Asymmetric Tail-Risk**: Positions entered during systematic market panic (**Fear**) demonstrate significantly lower downside **Value-at-Risk (VaR)**, while simultaneously maintaining much stronger risk-adjusted returns and superior profit factors.
 
 ---
 
-## 🚀 Execution & Setup Guide
-
-Follow these sequential steps to run the entire data pipeline, machine learning models, and interactive dashboard:
-
-### 1. Clone the Workspace & Install Dependencies
-First, install all necessary libraries. Run the following command from the root of the repository:
-```bash
-pip install -r requirements.txt
-```
-*(Note: If `requirements.txt` is missing, you can run `pip install pandas numpy matplotlib seaborn plotly scikit-learn streamlit requests`)*
-
-### 2. Download Raw Datasets
-Execute the ETL downloader script to fetch both datasets (Hyperliquid fills and FGI sentiment index) directly from Google Drive:
-```bash
-python src/download_data.py
-```
-This downloads and saves the datasets inside the `data/raw/` folder:
-*   `data/raw/hyperliquid_trader_data.csv` (~47.5 MB)
-*   `data/raw/bitcoin_fear_greed_index.csv` (~90 KB)
-
-### 3. Harmonize and Preprocess Datasets
-Clean the data, parse day-first IST timestamps, align dates, and engineer synthetic leverage metrics:
-```bash
-python src/data_preprocessing.py
-```
-This merges both datasets on date, computes notional PnL%, leverage ROE, win flags, and trade directions, and saves the result as `data/processed/merged_trader_data.csv` (211,224 rows, 30 columns).
-
-### 4. Execute Quantitative Analytics Engine
-Run the statistical computations across the 8 key quantitative focus areas (tail-risk VaR, profit factors, correlation coefficients, sizing, and asset performance):
-```bash
-python src/analytics_engine.py
-```
-This generates aggregated summaries inside the `data/results/` directory, saving them as lightweight CSVs (decoupling heavy data loading from visual frontends).
-
-### 5. Run Behavioral Clustering & ML Models
-Train the K-Means unsupervised model to segment wallets into personas, and train the RandomForest trade profitability classifier:
-```bash
-python src/ml_engine.py
-```
-This script yields:
-*   `data/results/trader_segments.csv` (unsupervised personas)
-*   `data/results/feature_importance.csv` (Random Forest model weights)
-*   `data/results/model_evaluation.json` (**85.0% Accuracy** and **0.90 ROC-AUC** metrics)
-
-### 6. Launch the Interactive Dashboard
-Boot up the high-fidelity Streamlit app to explore the dynamic visualizations, wallet audits, and predictive trade sandbox in real-time:
-```bash
-streamlit run src/dashboard.py
-```
-Open the local URL (usually `http://localhost:8501`) in your browser to interact with the system!
-
----
-
-## 🔬 Quantitative Methodology & Interview Defense
-
-Every statistical metric, Value at Risk boundary, and machine learning parameter in this repository was **computed from the raw transactional datasets**. You can technically defend the validity and mathematical rigor of these results using the following briefings during interviews:
-
-### 1. How did we achieve 85.0% Accuracy & 0.90 ROC-AUC?
-*   **Target Definition:** The target variable is the binary `win_flag` representing whether a realized closed transaction was profitable (`Closed PnL > 0`).
-*   **Features Used:** The `RandomForestClassifier` was trained on trade-level features including effective leverage, position notional size (`Size USD`), trade execution direction (`Long` vs `Short`), execution hour of the day (capturing funding rate windows and session open liquidity), and the daily Bitcoin Fear & Greed Index score.
-*   **Predictive Strengths:** Feature importance analysis indicated that Bitcoin Fear & Greed Index scores and execution timing were among the strongest predictors of realized trade profitability, highlighting that macro sentiment regimes and market execution timing dominate retail trader success in perpetual markets.
-
-### 2. How was Data Leakage prevented?
-*   **Train-Test Splitting:** The realized transaction fills were split into **70% Training** and **30% Testing** sets using stratified sampling on the `win_flag` to preserve the binary target distribution across both subsets.
-*   **No Look-Ahead Bias:** Sentiment index values are daily lagged relative to execution timestamps. No future trader fills, average returns, or future sentiment indices were included in the features. The modeling pipeline was designed to minimize look-ahead bias by restricting features to information available at execution time.
-
-### 3. How was Value at Risk (VaR) computed?
-*   **Historical Simulation Method:** Value at Risk (VaR) was computed using the non-parametric historical simulation method on realized transaction profits/losses.
-*   **Risk Bounds Definition:** For each FGI sentiment bucket, we extracted the distribution of realized dollar profits/losses. The **VaR 95%** represents the 5th percentile of the realized PnL distribution (indicating that 95% of trades had a better outcome), and **VaR 99%** represents the 1st percentile of the realized PnL distribution (indicating that 99% of trades had a better outcome).
-
-### 4. How was Leverage reconstructed?
-*   **Deterministic Modeling:** In the absence of an explicit client-side leverage parameter in public trade fills (since leverage is a client-side setting that is not recorded directly on-chain in public fill logs), we reconstructed the effective trade leverage.
-*   **Risk-Managed Heuristics:** We modeled leverage using standard institutional risk heuristics where leverage is inversely proportional to position notional size (USD) and bounded by asset-specific volatility parameters (e.g., lower leverage caps for volatile altcoins vs. major pairs), replicating realistic exchange margin constraints.
-
----
-
-## 📈 Core Analytical Insights Summary
-
-### 1. The 'Smile Curve' Inefficiency
-Realized trader returns exhibit a U-shaped distribution. Peak profits are captured during **Fear** (Total realized PnL: **$3.35M**, Profit Factor: **6.65**) and **Extreme Greed** (Total realized PnL: **$2.71M**, Profit Factor: **11.02**). In contrast, **Greed** represents an overconfidence trap characterized by FOMO entries, yielding higher average losses (-$181.97) and high trade-level loss ratios (23.1%).
-
-### 2. The High Leverage Trap
-Low-leverage (1x-3x) executions generate the bulk of aggregate profits (**$6.38M** realized PnL), whereas Extreme-leverage (21x-50x) trades yield a meager **$69.7K** due to tighter liquidation boundaries, force-closes, and aggressive transaction fee bleed. The correlation between leverage and dollar returns is consistently negative across every market regime.
-
-### 3. Tail-Risk Asymmetry
-Buying during **Fear** is structurally the safest asymmetric risk regime. The downside 99% Value at Risk (VaR) is minimized to only **-$236.60**, while average profit factor climbs to **6.65**, proving that entering positions during systematic market panic provides maximum risk insulation.
-
----
-
-## 🎓 Executive Recommendations
-
-1.  **Sentiment-Based Dynamic Leverage Caps:** Cap wallet leverage at **2.0x** when FGI > 75 (Greed/Extreme Greed) to protect users from sudden deleveraging liquidations. Expand leverage limits up to **5.0x** during FGI < 30 (Fear) to capitalize on high-asymmetric margin setups.
-2.  **Risk Bounded Position Sizing:** Set dynamic trade limits linked directly to FGI regimes, sizing down significantly in Greed and scaling up in Fear.
-3.  **Auditing PMs & Copy Trading:** Utilize our K-Means framework to audit portfolio managers, reallocating capital away from 'High-Leverage Speculators' and towards 'Institutional Whales' to stabilize long-term ecosystem TVL.
+<p align="center">
+  <i>Built to drive smarter trading strategies in Web3.</i>
+</p>

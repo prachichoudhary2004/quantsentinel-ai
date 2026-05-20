@@ -290,14 +290,25 @@ if df_raw is not None:
             fig_wr.update_yaxes(range=[40, 100])
             st.plotly_chart(fig_wr, use_container_width=True)
             
-        st.subheader("💡 Quantitative & Psychological Takeaway")
-        st.info(
-            "Our data shows a **'U-Shaped Smile'** in profitability. The most profitable sentiment environments are "
-            "**Fear** ($3.35M PnL) and **Extreme Greed** ($2.71M PnL), while **Neutral** and **Greed** represent relative performance lulls. "
-            "\n\n**Psychological Framing:** During **Fear**, traders buy oversold assets at significant discounts, securing high win rates. "
-            "During **Extreme Greed**, a strong momentum-driven market carries trades in clean directions. However, during **Greed** (exhibiting a drops to a 3.07 profit factor and 23.1% loss ratio), "
-            "traders fall victim to **Overconfidence Bias** and FOMO, taking poor entries on late-cycle rallies."
-        )
+        st.subheader("💡 Quantitative Insights")
+        if not sent_perf.empty:
+            max_pnl_idx = sent_perf['total_pnl'].idxmax()
+            min_pnl_idx = sent_perf['total_pnl'].idxmin()
+            top_sent = sent_perf.loc[max_pnl_idx, 'sentiment_class']
+            top_pnl = sent_perf.loc[max_pnl_idx, 'total_pnl']
+            bot_sent = sent_perf.loc[min_pnl_idx, 'sentiment_class']
+            bot_pnl = sent_perf.loc[min_pnl_idx, 'total_pnl']
+            
+            st.markdown(
+                f"""
+                <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border-left: 4px solid #58a6ff;">
+                    <b>Dynamic PnL Extremes:</b><br/>
+                    • <b>Most Profitable Environment:</b> {top_sent} (${top_pnl:,.2f})<br/>
+                    • <b>Least Profitable Environment:</b> {bot_sent} (${bot_pnl:,.2f})<br/>
+                    <i style="color:#8b949e; font-size: 0.85em;">(Values automatically update based on active filters)</i>
+                </div>
+                """, unsafe_allow_html=True
+            )
         
     # -------------------------------------------------------------
     # Tab 2: Leverage & Risk Mechanics
@@ -361,13 +372,23 @@ if df_raw is not None:
                 st.write("No realized trades for the selected filters to perform risk analysis.")
                 
         st.subheader("💡 Tail-Risk & Leverage Insights")
-        st.warning(
-            "**The High Leverage Trap:** Notice that **Low Leverage (1x-3x)** accounts for **$6.38M** in realized PnL, "
-            "whereas **Extreme Leverage (21x-50x)** barely makes **$69K** in realized PnL, despite identical market environments. "
-            "There is a stark negative relationship between leverage and realized dollar profit. "
-            "\n\n**Tail Risk (VaR):** **Extreme Fear** has an exceptionally high VaR 99% of **-$1,211.74**, indicating violent liquidation capitulations. "
-            "Conversely, **Fear** exhibits the tightest and safest risk bounds (VaR 99% is just **-$236.60**), confirming that entering positions during systematic fear is structurally the safest asymmetric reward-to-risk environment."
-        )
+        if not lev_perf.empty and len(risk_stats) > 0:
+            low_lev_pnl = lev_perf[lev_perf['leverage_bucket'] == 'Low Leverage (1x-3x)']['total_pnl'].sum() if 'Low Leverage (1x-3x)' in lev_perf['leverage_bucket'].values else 0
+            ext_lev_pnl = lev_perf[lev_perf['leverage_bucket'] == 'Extreme Leverage (21x-50x)']['total_pnl'].sum() if 'Extreme Leverage (21x-50x)' in lev_perf['leverage_bucket'].values else 0
+            max_risk_sent = df_risk_dyn.loc[df_risk_dyn['var_99'].idxmax(), 'sentiment_class']
+            max_risk_val = df_risk_dyn['var_99'].max()
+            
+            st.markdown(
+                f"""
+                <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border-left: 4px solid #f85149;">
+                    <b>Risk & Reward Imbalance:</b><br/>
+                    • <b>Low Leverage (1x-3x) PnL:</b> ${low_lev_pnl:,.2f}<br/>
+                    • <b>Extreme Leverage (21x-50x) PnL:</b> ${ext_lev_pnl:,.2f}<br/>
+                    • <b>Maximum Downside Exposure (VaR 99%):</b> {max_risk_sent} (${max_risk_val:,.2f})<br/>
+                    <i style="color:#8b949e; font-size: 0.85em;">(Values automatically update based on active filters)</i>
+                </div>
+                """, unsafe_allow_html=True
+            )
 
     # -------------------------------------------------------------
     # Tab 3: Activity & Sizing
@@ -429,13 +450,24 @@ if df_raw is not None:
             st.plotly_chart(fig_size, use_container_width=True)
             
         st.subheader("💡 Sizing & Frequency Takeaways")
-        st.info(
-            "**Overtrading in Panic:** Traders exhibit hyper-activity during **Extreme Fear** (averaging **1,528 trades per day** "
-            "and a huge volume of **$8.17M per day**). In contrast, their activity drops to just **259 trades per day** during **Greed**. "
-            "\n\n**Behavioral Rationale:** This shows that market panic creates hyper-volatility, causing liquidations, tight scalping, and automated stop-losses to fire rapidly. "
-            "In contrast, during **Greed & Extreme Greed**, traders hold onto winning momentum trends ('HODL'), causing trades/day to plummet while their position sizes remain moderate. "
-            "They let their profits run, which is the hallmark of highly profitable periods."
-        )
+        if not df_freq_dyn.empty:
+            max_freq_idx = df_freq_dyn['avg_trades_per_day'].idxmax()
+            min_freq_idx = df_freq_dyn['avg_trades_per_day'].idxmin()
+            high_freq_sent = df_freq_dyn.loc[max_freq_idx, 'sentiment_class']
+            high_freq_val = df_freq_dyn.loc[max_freq_idx, 'avg_trades_per_day']
+            low_freq_sent = df_freq_dyn.loc[min_freq_idx, 'sentiment_class']
+            low_freq_val = df_freq_dyn.loc[min_freq_idx, 'avg_trades_per_day']
+            
+            st.markdown(
+                f"""
+                <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border-left: 4px solid #39d353;">
+                    <b>Trading Activity Spikes:</b><br/>
+                    • <b>Peak Hyper-Activity:</b> {high_freq_sent} ({high_freq_val:,.0f} trades/day)<br/>
+                    • <b>Lowest Activity Phase (HODL):</b> {low_freq_sent} ({low_freq_val:,.0f} trades/day)<br/>
+                    <i style="color:#8b949e; font-size: 0.85em;">(Values automatically update based on active filters)</i>
+                </div>
+                """, unsafe_allow_html=True
+            )
 
     # -------------------------------------------------------------
     # Tab 4: Trader Segments
