@@ -1,4 +1,13 @@
 import streamlit as st
+
+# Set page configuration to wide layout and professional fintech theme MUST BE FIRST
+st.set_page_config(
+    page_title="Sentiment-Driven Crypto Trading Intelligence System",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -6,6 +15,26 @@ import plotly.graph_objects as go
 import json
 import os
 import pickle
+import sys
+import subprocess
+
+# Auto-Initialization for Streamlit Cloud
+if not os.path.exists("data/processed/merged_trader_data.csv"):
+    with st.status("Initializing Intelligence Pipeline (First-time Cloud Deployment Setup)...", expanded=True) as status:
+        try:
+            st.write("📥 Downloading raw datasets from Google Drive...")
+            subprocess.run([sys.executable, "src/download_data.py"], check=True)
+            st.write("🧹 Preprocessing data and generating features...")
+            subprocess.run([sys.executable, "src/data_preprocessing.py"], check=True)
+            st.write("🧮 Computing quantitative analytics...")
+            subprocess.run([sys.executable, "src/analytics_engine.py"], check=True)
+            st.write("🤖 Training ML clustering & predictive models...")
+            subprocess.run([sys.executable, "src/ml_engine.py"], check=True)
+            status.update(label="✅ Setup complete! Loading terminal...", state="complete", expanded=False)
+            st.rerun()
+        except Exception as e:
+            st.error(f"Pipeline failed: {e}")
+            st.stop()
 
 # Load prediction model
 @st.cache_resource
@@ -16,14 +45,6 @@ def load_prediction_model():
     return None, None
 
 rf_model, training_features = load_prediction_model()
-
-# Set page configuration to wide layout and professional fintech theme
-st.set_page_config(
-    page_title="Sentiment-Driven Crypto Trading Intelligence System",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Custom premium CSS styling (glassmorphism, clean fonts, dark terminal vibes)
 st.markdown("""
@@ -96,9 +117,7 @@ st.markdown("""
 def load_processed_data():
     if os.path.exists("data/processed/merged_trader_data.csv"):
         return pd.read_csv("data/processed/merged_trader_data.csv")
-    else:
-        st.error("Processed data file not found! Please run the preprocessing scripts first.")
-        return None
+    return None
 
 @st.cache_data
 def load_trader_segments():
