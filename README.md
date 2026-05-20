@@ -54,7 +54,7 @@ By analyzing real historical trades against daily sentiment data, this intellige
 
 ## 🗄️ Datasets
 
-This project relies on two primary data sources, provided as part of the **Primetrade.ai** Data Science Assignment:
+This project relies on two primary data sources:
 
 1. **Historical Trader Data from Hyperliquid**
    - **Description**: Contains thousands of individual trades executed on the Hyperliquid Perpetual DEX.
