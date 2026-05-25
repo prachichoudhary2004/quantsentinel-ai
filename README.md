@@ -1,144 +1,326 @@
-<h1 align="center">⚡ Sentiment-Driven Crypto Intelligence System</h1>
+<h1 align="center">🚀 QuantSentinel AI</h1>
+
+<h3 align="center">Behavioral Trading Intelligence Platform</h3>
 
 <div align="center">
-  <img src="https://img.shields.io/badge/Python-3.9+-blue.svg" alt="Python Version"/>
-  <img src="https://img.shields.io/badge/Machine%20Learning-scikit--learn-orange.svg" alt="scikit-learn"/>
-  <img src="https://img.shields.io/badge/Dashboard-Streamlit-red.svg" alt="Streamlit"/>
-  <img src="https://img.shields.io/badge/Data%20Science-Pandas%20%7C%20NumPy-yellow.svg" alt="Data Science"/>
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square)
+![PySpark](https://img.shields.io/badge/PySpark-Big%20Data-orange?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green?style=flat-square)
+![Delta Lake](https://img.shields.io/badge/Delta-Lakehouse-purple?style=flat-square)
+![FinBERT](https://img.shields.io/badge/NLP-FinBERT-red?style=flat-square)
+![XGBoost](https://img.shields.io/badge/ML-XGBoost-yellow?style=flat-square)
+![Streamlit](https://img.shields.io/badge/UI-Streamlit-ff4b4b?style=flat-square)
+![Docker](https://img.shields.io/badge/DevOps-Docker-2496ED?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-brightgreen?style=flat-square)
+
 </div>
 
 <br/>
 
- **An end-to-end quantitative and behavioral analytics platform** built to uncover how market psychology influences trader profitability, leverage behavior, and execution risk. This project merges the **Bitcoin Fear & Greed Index** with real-world trading activity from the **Hyperliquid Perpetual DEX**.
+QuantSentinel AI is an end-to-end **Behavioral Trading Intelligence Platform** that combines quantitative finance, machine learning, explainable AI, NLP-driven sentiment analysis, and modern data engineering to uncover how trader psychology impacts profitability, leverage behavior, portfolio risk, and market dynamics.
+
+The platform integrates **Hyperliquid perpetual futures trading data**, **Bitcoin Fear & Greed sentiment**, **historical cryptocurrency market data**, and **financial news intelligence** to generate actionable behavioral, risk, and sentiment-driven insights.
 
 ---
 
-## 📖 Project Overview
+## Table of Contents
 
-Understanding the cryptocurrency market requires more than just price analysis—it requires understanding *human psychology*. This project investigates the profound relationship between market sentiment (Fear vs. Greed) and trader behavior. 
-
-By analyzing real historical trades against daily sentiment data, this intelligence system uncovers hidden patterns, such as when traders take on the most risk, when they are most likely to face liquidations, and how institutional trading strategies differ from emotionally-driven retail trading.
-
----
-
-## ✨ Comprehensive Feature Set
-
-### 1. 🧠 Sentiment-Driven Behavioral Analytics
-- **Sentiment & PnL Correlation**: Analyzes win rates, total realized PnL, and Return on Equity (ROE) across 5 distinct sentiment regimes (Extreme Fear, Fear, Neutral, Greed, Extreme Greed).
-- **Leverage Fallacy Detection**: Identifies how leverage behavior shifts during volatile market conditions and quantifies the amplified downside risk of extreme leverage (21x–50x).
-
-### 2. 📈 Advanced Quantitative Risk Modeling
-- **Value-at-Risk (VaR)**: Calculates 95% and 99% VaR for each sentiment class to mathematically quantify tail-risk during market panics versus euphoric rallies.
-- **Profit Factors & Return Profiles**: Evaluates gross profits relative to gross losses, isolating which market environments generate the most asymmetric, positive expected value (+EV) opportunities.
-
-### 3. 🤖 Machine Learning Implementation
-- **Trader Persona Segmentation (K-Means Clustering)**: Unsupervised learning groups individual accounts into professional archetypes based on their trading statistics:
-  - 🐋 *Institutional Whales* (High volume, high PnL)
-  - 🎰 *High-Leverage Speculators* (Extreme risk, high volatility)
-  - ⚡ *Systematic Scalpers* (High frequency, lower sizing)
-  - 🛡️ *Conservative/Tactical Retail* (Low frequency, tactical entries)
-- **Trade Profitability Prediction (Random Forest Classifier)**: A supervised predictive model trained to forecast whether an individual trade will be profitable based on leverage, trade size, direction, and prevailing market sentiment.
-
-### 4. 📊 Interactive Analytics Dashboard
-- A fully responsive **Streamlit UI** allowing users to interactively slice and dice data. It features:
-  - Visual distribution of leverage across different sentiment states.
-  - Heatmaps for extreme loss events and risk indicators.
-  - Deep-dives into individual trader performance and segmented personas.
-
-### 5. 🚀 Automated ETL Pipeline
-- **Zero-Touch Ingestion**: Automatically downloads raw CSV datasets directly from Google Drive.
-- **Robust Preprocessing**: Harmonizes timestamps, engineers deterministic leverage metrics, calculates ROE, assigns win/loss flags, and handles missing data.
-
----
-## Dashboard
-
-<br>
-<img width="1891" height="880" alt="image" src="https://github.com/user-attachments/assets/758ae7be-df0d-4d69-a3d1-364a2a141c23" />
-
-<img width="1910" height="902" alt="image" src="https://github.com/user-attachments/assets/e1770f0b-d037-4f11-b26f-09aba5eea503" />
-
-<img width="1909" height="892" alt="image" src="https://github.com/user-attachments/assets/e6301fb5-c3cf-4f55-ad08-50242590d81f" />
-
-<img width="1906" height="892" alt="image" src="https://github.com/user-attachments/assets/aafd7d80-24eb-4451-8608-75f7154bf07e" />
-
+- [Key Findings](#-key-findings)
+- [System Architecture](#-system-architecture)
+- [Core Capabilities](#-core-capabilities)
+- [Platform Modules](#-platform-modules)
+- [Data Sources](#-data-sources)
+- [Dashboard](#-dashboard)
+- [Quick Start](#-quick-start)
+- [Technology Stack](#-technology-stack)
+- [License](#-license)
 
 ---
 
+## 💡 Key Findings
 
-## 🗄️ Datasets
+> These are the primary behavioral insights the platform surfaces across trader segments.
 
-This project relies on two primary data sources:
+**The Overconfidence Trap** — Peak profitability often occurs during Fear regimes, while Greed environments frequently become overconfidence traps that encourage poor risk management and excessive leverage usage.
 
-1. **Historical Trader Data from Hyperliquid**
-   - **Description**: Contains thousands of individual trades executed on the Hyperliquid Perpetual DEX.
-   - **Key Features**: `Account`, `Coin`, `Execution Price`, `Size USD`, `Direction`, `Closed PnL`, `Timestamp`.
-   - 🔗 [Download Raw Dataset (Google Drive)](https://drive.google.com/file/d/1IAfLZwu6rJzyWKgBToqwSmmVYU6VbjVs/view?usp=sharing)
+**The Leverage Fallacy** — Low-leverage traders consistently outperform highly leveraged participants on a risk-adjusted basis, despite generating lower gross returns.
 
-2. **Bitcoin Market Sentiment Dataset**
-   - **Description**: Daily index measuring the emotional state of the crypto market.
-   - **Key Features**: `Date`, `Value (0-100)`, `Classification (Fear/Greed)`.
-   - 🔗 [Download Raw Dataset (Google Drive)](https://drive.google.com/file/d/1PgQC0tO8XN-wqkNyghWc_-mnrYv_nhSf/view?usp=sharing)
+**Asymmetric Tail Risk** — Fear regimes demonstrate superior risk-adjusted returns and lower downside exposure compared with euphoric market environments.
+
+**Behavioral Bias Impact** — FOMO, overconfidence, panic selling, and loss chasing significantly influence profitability outcomes and risk exposure across all trader segments.
 
 ---
 
-## 🚀 Quick Start Guide
+## 🏗 System Architecture
 
-Run the complete pipeline from raw data extraction to dashboard deployment in **four simple steps**.
+<img width="1440" height="1440" alt="image" src="https://github.com/user-attachments/assets/8b7a4324-f6db-4cd7-bdb9-9edcabf17942" />
+
+---
+
+## 🎯 Core Capabilities
+
+### 🧠 Behavioral Finance Intelligence
+
+Detects and quantifies trader behavioral biases in real time:
+
+- **Trader Persona Discovery** — unsupervised segmentation of trader archetypes
+- **Behavioral Risk Scoring** — composite score per trader based on bias exposure
+- **FOMO Detection** — identifies momentum-chasing entries under sentiment pressure
+- **Overconfidence Detection** — flags disproportionate position sizing relative to edge
+- **Loss Chasing Identification** — detects revenge trading patterns after drawdowns
+- **Panic Selling Analysis** — identifies capitulation exits at unfavorable prices
+- **Risk Profiling & Trader Classification** — maps traders to behavioral risk tiers
+
+---
+
+### 📈 Quantitative Risk Analytics
+
+Full suite of institutional-grade risk metrics computed per trader and per portfolio:
+
+| Metric | Description |
+|--------|-------------|
+| VaR | Value-at-Risk at configurable confidence levels |
+| CVaR | Conditional Value-at-Risk (Expected Shortfall) |
+| Sharpe Ratio | Return per unit of total volatility |
+| Sortino Ratio | Return per unit of downside deviation |
+| Calmar Ratio | Return relative to maximum drawdown |
+| Maximum Drawdown | Peak-to-trough equity decline |
+| Downside Deviation | Volatility of negative returns only |
+| Rolling Risk Metrics | Time-windowed versions of all metrics above |
+| Kelly Criterion | Optimal position sizing given historical edge |
+| Risk Budgeting | Portfolio-level allocation by risk contribution |
+
+---
+
+### 🤖 Machine Learning
+
+**Supervised Learning**
+
+- Random Forest, XGBoost, LightGBM
+- Automated model benchmarking with cross-validation
+- Evaluation: Accuracy, Precision, Recall, F1, ROC-AUC, Confusion Matrix
+
+**Unsupervised Learning**
+
+- K-Means trader segmentation
+- Market regime detection (Bull / Bear / Sideways / High Volatility)
+
+---
+
+### 🔍 Explainable AI (XAI)
+
+- SHAP global feature importance — which features drive predictions across the dataset
+- SHAP local explanations — why the model made a specific prediction for a specific trader
+- Feature contribution analysis and interactive explainability dashboard
+
+---
+
+### 📰 NLP & Market Sentiment Intelligence
+
+**News Sources**
+
+- CoinDesk RSS
+- CoinTelegraph RSS
+- Yahoo Finance Crypto
+- CryptoPanic API
+
+**NLP Pipeline**
+
+- FinBERT sentiment analysis (finance-domain BERT)
+- Lexicon-based fallback engine for low-latency inference
+- Topic modeling (BERTopic / LDA)
+- Named Entity Recognition (coins, exchanges, institutions, regulators)
+- Market impact scoring
+- Sentiment momentum, volatility, and acceleration tracking
+
+**Intelligence Outputs**
+
+- Bullish / Bearish signal classification
+- Topic evolution and emerging trend detection
+- Entity-level sentiment mapping
+- Daily AI-generated market brief
+
+---
+
+### ⚙️ Data Engineering Platform
+
+**Medallion Architecture**
+
+| Layer | Contents |
+|-------|----------|
+| Bronze | Raw ingested data — trades, prices, sentiment, news |
+| Silver | Validated, cleaned, feature-engineered data |
+| Gold | Analytics-ready tables: risk metrics, sentiment aggregates, behavioral features |
+
+**Processing Stack**
+
+- PySpark ETL pipelines with incremental processing
+- Delta Lake storage with ACID guarantees
+- Schema enforcement and partition optimization
+- dbt data models: fact tables, dimension tables, data lineage, automated tests
+
+---
+
+### 🚀 Backend & Platform Engineering
+
+**FastAPI Services**
+
+- `/predict` — ML prediction endpoint
+- `/risk` — trader and portfolio risk metrics
+- `/regime` — current and historical market regime
+- `/sentiment` — sentiment scores and momentum
+- `/topics` — topic model outputs
+- `/entities` — named entity sentiment mapping
+
+**Production Engineering**
+
+- Dockerized deployment with `docker-compose`
+- CI/CD via GitHub Actions
+- Pipeline monitoring, data quality validation, and observability metrics
+- Structured execution logging
+
+---
+
+## 📊 Platform Modules
+
+| Module | Functionality |
+|--------|---------------|
+| Behavioral Intelligence | Trader profiling, FOMO, overconfidence, loss chasing, panic selling |
+| Risk Intelligence | VaR, CVaR, Sharpe, Sortino, Calmar, Drawdown analytics |
+| Portfolio Simulator | Kelly sizing, risk budgeting, equity curve simulation |
+| Market Regimes | Bull, Bear, Sideways, High Volatility classification |
+| NLP Intelligence | FinBERT sentiment, topic modeling, NER, impact scoring |
+| Explainable AI | SHAP global and local prediction explanations |
+| Data Quality Center | Missing values, duplicates, outlier detection, drift monitoring |
+| Observability Center | Pipeline health, runtime metrics, throughput, API health |
+| Developer Portal | Interactive FastAPI documentation and endpoint explorer |
+
+---
+
+## 🗄 Data Sources
+
+### Hyperliquid Trading Dataset
+
+Historical perpetual futures trading activity with the following fields:
+
+```
+Account | Coin | Direction | Execution Price | Size USD | Closed PnL | Timestamp
+```
+
+### Bitcoin Fear & Greed Index
+
+```
+Source: https://api.alternative.me/fng/
+Fields: Sentiment Score (0–100), Classification, Historical States
+```
+
+### Cryptocurrency Market Data
+
+```
+Source: CoinGecko API
+Assets: Bitcoin (BTC), Ethereum (ETH), Solana (SOL)
+Fields: OHLCV, Returns, Volatility, Trend Indicators
+```
+
+### Financial News
+
+```
+Sources: CoinDesk RSS, CoinTelegraph RSS, Yahoo Finance Crypto, CryptoPanic API
+Used for: Sentiment Analysis, Topic Modeling, NER, Market Impact Detection
+```
+
+---
+
+## 📊 Dashboard
+
+The Streamlit Intelligence Portal exposes the following modules:
+
+| Dashboard Module | Description |
+|------------------|-------------|
+| Quant Metrics | Risk analytics, portfolio simulator, regime detection, SHAP explanations, model benchmarks |
+| Trader Persona Intelligence | Persona rankings, behavioral risk scores, profitability breakdowns |
+| Risk Intelligence Center | VaR, CVaR, drawdowns, Sharpe analytics, tail risk monitoring |
+| News Intelligence | Latest articles with sentiment labels, topic clusters, entity highlights |
+| Sentiment Intelligence | Momentum tracking, bull/bear ratios, sentiment volatility and acceleration |
+| Topic Intelligence | Topic popularity, emerging trends, topic evolution over time |
+| Entity Intelligence | Coins, exchanges, institutions, and regulators with mapped sentiment |
+| Market Impact Dashboard | Critical events, impact scores, risk alerts |
+| Data Quality Center | Missing values, duplicate records, outlier detection, drift monitoring |
+| Pipeline Observability | Pipeline health, runtime metrics, throughput monitoring, API health |
+| Developer Portal | FastAPI endpoint explorer with request/response examples |
+
+---
+
+## 🚀 Quick Start
 
 ### 1. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Download Raw Datasets
-This script will automatically pull the datasets from the Google Drive links above.
-```bash
-python src/download_data.py
-```
+### 2. Run Core Pipelines
 
-### 3. Process Data & Train Models
-Execute the core analytical engine. This cleans the data, runs the quantitative analyses, and trains the Random Forest and K-Means models. Outputs will be saved to the `data/results/` directory.
 ```bash
-python src/data_preprocessing.py
-python src/analytics_engine.py
+# Data ingestion and NLP pipeline
+python src/news_ingestion.py
+python src/text_preprocessing.py
+python src/sentiment_engine.py
+python src/topic_modeling.py
+python src/entity_extraction.py
+python src/impact_scoring.py
+python src/sentiment_trends.py
+
+# Machine learning pipeline
 python src/ml_engine.py
 ```
 
-### 4. Launch Interactive Dashboard
-Fire up the local Streamlit server to visualize the findings.
+### 3. Start FastAPI Backend
+
+```bash
+uvicorn src.api:app --reload
+```
+
+API docs available at: `http://localhost:8000/docs`
+
+### 4. Launch Dashboard
+
 ```bash
 streamlit run src/dashboard.py
 ```
-*The dashboard will automatically open in your default browser at `http://localhost:8501`.*
 
----
+Dashboard available at: `http://localhost:8501`
 
-## 📂 Project Architecture
+### 5. Docker Deployment (Optional)
 
-```text
-📦 sentiment-driven-crypto-intelligence
-├── 📁 data/
-│   ├── raw/                  # Downloaded raw datasets
-│   ├── processed/            # Cleaned & feature-engineered datasets
-│   └── results/              # Exported analytical CSVs and serialized ML models
-├── 📁 notebooks/             # Jupyter notebooks for EDA
-├── 📁 reports/               # Executive summaries
-├── 📁 src/
-│   ├── 📥 download_data.py      # Automated dataset extraction
-│   ├── 🧹 data_preprocessing.py # Data harmonization & deterministic leverage
-│   ├── 🧮 analytics_engine.py   # Quant metrics: VaR, Profit Factors, correlations
-│   ├── 🤖 ml_engine.py          # ML pipelines: K-Means & Random Forest
-│   └── 🖥️ dashboard.py          # Streamlit interactive dashboard
-├── 📄 requirements.txt       # Project dependencies
-└── 📄 README.md              # You are here!
+```bash
+docker-compose up --build
 ```
 
 ---
 
-## 📊 Key Findings & Insights
+## 🛠 Technology Stack
 
-1. **The Overconfidence Trap**: Peak trader profitability actually occurs during periods of **Fear** and **Extreme Greed**. Standard **Greed** phases often act as *overconfidence traps*—emotionally-driven FOMO entries that lead to elevated retail losses.
-2. **The Leverage Fallacy**: Low-leverage traders (**1x–3x**) consistently capture the vast majority of aggregate profits. High-leverage trades (**21x–50x**) experience amplified downside risk due to extreme volatility exposure and sudden liquidation cascades.
-3. **Asymmetric Tail-Risk**: Positions entered during systematic market panic (**Fear**) demonstrate significantly lower downside **Value-at-Risk (VaR)**, while simultaneously maintaining much stronger risk-adjusted returns and superior profit factors.
+| Category | Technologies |
+|----------|-------------|
+| Language | Python 3.10+ |
+| Data Engineering | PySpark, Delta Lake, dbt, Pandas, NumPy |
+| Machine Learning | Scikit-Learn, XGBoost, LightGBM |
+| NLP | FinBERT, BERTopic, spaCy |
+| Explainability | SHAP |
+| Backend | FastAPI, Uvicorn |
+| Frontend | Streamlit, Plotly |
+| DevOps | Docker, GitHub Actions |
 
 ---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+<h3 align="center">
+Built for Quantitative Finance · Behavioral Analytics · NLP Intelligence · Modern Data Engineering
+</h3>
