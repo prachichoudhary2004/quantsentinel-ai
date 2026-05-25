@@ -2,7 +2,7 @@ import streamlit as st
 
 # Set page configuration to wide layout and professional fintech theme MUST BE FIRST
 st.set_page_config(
-    page_title="Sentiment-Driven Crypto Trading Intelligence System",
+    page_title="QuantSentinel AI – Sentiment & Behavioral Trading Platform",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -18,25 +18,50 @@ import pickle
 import sys
 import subprocess
 
-# Auto-Initialization for Streamlit Cloud
-if not os.path.exists("data/processed/merged_trader_data.csv"):
-    with st.status("Initializing Intelligence Pipeline (First-time Cloud Deployment Setup)...", expanded=True) as status:
+# Import Phase 1 & 3 analytical, explanation, and NLP modules
+from src.risk_analytics import generate_risk_metrics_report
+from src.shap_explainer import CryptoSHAPExplainer
+from src.portfolio_analytics import run_portfolio_simulation
+from src.regime_detection import detect_market_regimes
+
+# Auto-Initialization for Medallion & NLP pipelines
+if not os.path.exists("data/silver/merged_trader_data.csv") or not os.path.exists("data/results/trader_behavioral_personas.csv"):
+    with st.status("Initializing Behavioral Lakehouse Platform...", expanded=True) as status:
         try:
-            st.write("📥 Downloading raw datasets from Google Drive...")
+            st.write("Ingesting news feeds (Bronze)...")
             subprocess.run([sys.executable, "src/download_data.py"], check=True)
-            st.write("🧹 Preprocessing data and generating features...")
-            subprocess.run([sys.executable, "src/data_preprocessing.py"], check=True)
-            st.write("🧮 Computing quantitative analytics...")
-            subprocess.run([sys.executable, "src/analytics_engine.py"], check=True)
-            st.write("🤖 Training ML clustering & predictive models...")
+            subprocess.run([sys.executable, "src/news_ingestion.py"], check=True)
+            
+            st.write("Executing Medallion Preprocessing transforms (Silver)...")
+            subprocess.run([sys.executable, "src/bronze_to_silver.py"], check=True)
+            subprocess.run([sys.executable, "src/text_preprocessing.py"], check=True)
+            
+            st.write("Curating Advanced Risk and Portfolio Simulators (Gold)...")
+            subprocess.run([sys.executable, "src/silver_to_gold.py"], check=True)
+            
+            st.write("Executing FinBERT sentiment engine & unsupervised topic clustering...")
+            subprocess.run([sys.executable, "src/sentiment_engine.py"], check=True)
+            subprocess.run([sys.executable, "src/topic_modeling.py"], check=True)
+            subprocess.run([sys.executable, "src/entity_extraction.py"], check=True)
+            subprocess.run([sys.executable, "src/impact_scoring.py"], check=True)
+            subprocess.run([sys.executable, "src/sentiment_trends.py"], check=True)
+            
+            st.write("Executing MLOps Model Comparisons & Behavioral Finance Engine...")
             subprocess.run([sys.executable, "src/ml_engine.py"], check=True)
+            
+            # Run behavioral finance aggregation
+            if os.path.exists("data/silver/merged_trader_data.csv"):
+                df_silv = pd.read_csv("data/silver/merged_trader_data.csv")
+                from src.behavioral_intelligence import analyze_trader_behavior
+                analyze_trader_behavior(df_silv)
+                
             status.update(label="✅ Setup complete! Loading terminal...", state="complete", expanded=False)
             st.rerun()
         except Exception as e:
             st.error(f"Pipeline failed: {e}")
             st.stop()
 
-# Load prediction model
+# Cache prediction models
 @st.cache_resource
 def load_prediction_model():
     if os.path.exists("data/results/profitable_trade_model.pkl"):
@@ -45,78 +70,15 @@ def load_prediction_model():
     return None, None
 
 rf_model, training_features = load_prediction_model()
-
-# Custom premium CSS styling (glassmorphism, clean fonts, dark terminal vibes)
-st.markdown("""
-<style>
-    .reportview-container {
-        background: #0d1117;
-    }
-    .main {
-        background-color: #0b0e14;
-        color: #c9d1d9;
-        font-family: 'Inter', sans-serif;
-    }
-    h1, h2, h3 {
-        color: #ffffff;
-        font-weight: 700;
-        font-family: 'Space Grotesk', sans-serif;
-    }
-    div[data-testid="stMetricValue"] {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #58a6ff;
-    }
-    div[data-testid="stMetricLabel"] {
-        font-size: 0.9rem;
-        color: #8b949e;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #161b22;
-        padding: 6px 12px;
-        border-radius: 8px;
-        border: 1px solid #30363d;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        white-space: pre-wrap;
-        background-color: transparent;
-        border-radius: 4px;
-        color: #8b949e;
-        font-weight: 600;
-        transition: all 0.2s ease-in-out;
-    }
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #ffffff;
-        background-color: #21262d;
-    }
-    .stTabs [aria-selected="true"] {
-        color: #58a6ff !important;
-        background-color: #30363d !important;
-        border-bottom: 2px solid #58a6ff !important;
-    }
-    .card {
-        background-color: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 15px;
-    }
-    .green-text { color: #39d353; font-weight: bold; }
-    .red-text { color: #f85149; font-weight: bold; }
-</style>
-""", unsafe_allow_html=True)
+explainer = CryptoSHAPExplainer()
 
 # -------------------------------------------------------------
-# Data Loading & Caching
+# Data Loading & Caching (Medallion Layers)
 # -------------------------------------------------------------
 @st.cache_data
-def load_processed_data():
-    if os.path.exists("data/processed/merged_trader_data.csv"):
-        return pd.read_csv("data/processed/merged_trader_data.csv")
+def load_silver_data():
+    if os.path.exists("data/silver/merged_trader_data.csv"):
+        return pd.read_csv("data/silver/merged_trader_data.csv")
     return None
 
 @st.cache_data
@@ -126,49 +88,122 @@ def load_trader_segments():
     return None
 
 @st.cache_data
-def load_feature_importance():
-    if os.path.exists("data/results/feature_importance.csv"):
-        return pd.read_csv("data/results/feature_importance.csv")
+def load_gold_regimes():
+    if os.path.exists("data/gold/market_regimes.csv"):
+        return pd.read_csv("data/gold/market_regimes.csv")
     return None
 
-df_raw = load_processed_data()
-df_segments = load_trader_segments()
-df_importance = load_feature_importance()
+@st.cache_data
+def load_gold_portfolio_sim():
+    if os.path.exists("data/gold/portfolio_simulations.csv"):
+        return pd.read_csv("data/gold/portfolio_simulations.csv")
+    return None
 
-if df_raw is not None:
-    # -------------------------------------------------------------
-    # Sidebar Filters
-    # -------------------------------------------------------------
-    st.sidebar.image("https://cryptologos.cc/logos/bitcoin-btc-logo.png", width=50)
-    st.sidebar.title("Trading Intelligence")
-    st.sidebar.markdown("*Quant Behavioral Analytics Terminal*")
-    st.sidebar.divider()
+@st.cache_data
+def load_gold_sentiment_scores():
+    if os.path.exists("data/gold/sentiment/sentiment_scores.csv"):
+        return pd.read_csv("data/gold/sentiment/sentiment_scores.csv")
+    return None
+
+@st.cache_data
+def load_gold_sentiment_trends():
+    if os.path.exists("data/gold/sentiment/sentiment_trends.csv"):
+        return pd.read_csv("data/gold/sentiment/sentiment_trends.csv")
+    return None
+
+@st.cache_data
+def load_gold_topics():
+    if os.path.exists("data/gold/sentiment/topic_clusters.csv"):
+        return pd.read_csv("data/gold/sentiment/topic_clusters.csv")
+    return None
+
+@st.cache_data
+def load_gold_entities():
+    if os.path.exists("data/gold/sentiment/extracted_entities.csv"):
+        return pd.read_csv("data/gold/sentiment/extracted_entities.csv")
+    return None
+
+@st.cache_data
+def load_gold_impact():
+    if os.path.exists("data/gold/sentiment/market_impact_scores.csv"):
+        return pd.read_csv("data/gold/sentiment/market_impact_scores.csv")
+    return None
+
+@st.cache_data
+def load_behavioral_personas():
+    if os.path.exists("data/results/trader_behavioral_personas.csv"):
+        return pd.read_csv("data/results/trader_behavioral_personas.csv")
+    return None
+
+df_raw = load_silver_data()
+df_segments = load_trader_segments()
+df_regimes = load_gold_regimes()
+df_portfolio_sim = load_gold_portfolio_sim()
+
+df_nlp_scores = load_gold_sentiment_scores()
+df_nlp_trends = load_gold_sentiment_trends()
+df_nlp_topics = load_gold_topics()
+df_nlp_entities = load_gold_entities()
+df_nlp_impact = load_gold_impact()
+df_behavioral = load_behavioral_personas()
+
+# Custom CSS
+st.markdown("""
+<style>
+    .reportview-container { background: #0d1117; }
+    .main { background-color: #0b0e14; color: #c9d1d9; font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { color: #ffffff; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------------------
+# Sidebar Navigation
+# -------------------------------------------------------------
+st.sidebar.image("https://cryptologos.cc/logos/bitcoin-btc-logo.png", width=50)
+st.sidebar.title("QuantSentinel AI")
+st.sidebar.markdown("*Behavioral Finance Platform*")
+st.sidebar.divider()
+
+page = st.sidebar.selectbox(
+    "Select Intelligence View",
+    [
+        "📊 Quant Metrics Dashboard",
+        "🧠 Behavioral Finance",
+        "👥 Trader Personas",
+        "🛡️ Risk Intelligence",
+        "📰 News Intelligence",
+        "🧠 Sentiment Intelligence",
+        "💬 Topic Intelligence",
+        "👥 Entity Intelligence",
+        "💥 Market Impact Dashboard"
+    ]
+)
+st.sidebar.divider()
+
+if df_regimes is not None and not df_regimes.empty:
+    current_regime = df_regimes.iloc[-1]['market_regime']
+    sentiment_score = df_regimes.iloc[-1]['sentiment_score']
+    regime_color = "#39d353" if "Bull" in current_regime else ("#f85149" if "Bear" in current_regime else "#ff7f0e")
     
-    # Account Filter
+    st.sidebar.markdown(f"""
+    <div style="background-color:#161b22; border:1px solid #30363d; padding:15px; border-radius:8px;">
+        <span style="font-size:0.8em; color:#8b949e; text-transform:uppercase; letter-spacing:1px;">Quant Market Regime</span>
+        <h3 style="color:{regime_color}; margin-top:5px; margin-bottom:5px;">{current_regime}</h3>
+        <span style="font-size:0.85em; color:#c9d1d9;">Sentiment Index: <b>{sentiment_score:.0f}/100</b></span>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -------------------------------------------------------------
+# Screen 1: Quant Metrics Dashboard (Existing backward compatible tabs)
+# -------------------------------------------------------------
+if page == "📊 Quant Metrics Dashboard" and df_raw is not None:
     all_accounts = sorted(df_raw['Account'].unique())
-    selected_accounts = st.sidebar.multiselect(
-        "Filter Trader Accounts",
-        options=all_accounts,
-        default=[]
-    )
-    
-    # Coin Filter
+    selected_accounts = st.sidebar.multiselect("Filter Trader Accounts", options=all_accounts, default=[])
     all_coins = sorted(df_raw['Coin'].unique())
-    selected_coins = st.sidebar.multiselect(
-        "Filter Symbols (Coins)",
-        options=all_coins,
-        default=[]
-    )
-    
-    # Sentiment Filter
+    selected_coins = st.sidebar.multiselect("Filter Symbols (Coins)", options=all_coins, default=[])
     all_sentiments = ['Extreme Fear', 'Fear', 'Neutral', 'Greed', 'Extreme Greed']
-    selected_sentiments = st.sidebar.multiselect(
-        "Filter Market Sentiment",
-        options=all_sentiments,
-        default=all_sentiments
-    )
+    selected_sentiments = st.sidebar.multiselect("Filter Market Sentiment", options=all_sentiments, default=all_sentiments)
     
-    # Apply filters dynamically
     df_filtered = df_raw.copy()
     if selected_accounts:
         df_filtered = df_filtered[df_filtered['Account'].isin(selected_accounts)]
@@ -179,516 +214,358 @@ if df_raw is not None:
         
     df_realized = df_filtered[df_filtered['is_closing_trade'] == True].copy()
     
-    # -------------------------------------------------------------
-    # Main Terminal Layout
-    # -------------------------------------------------------------
-    st.title("⚡ Sentiment-Driven Crypto Trading Intelligence")
-    st.markdown(
-        "Explores the structural relationships between crypto market sentiment (Bitcoin Fear & Greed Index) "
-        "and real-world trader performance on Hyperliquid."
-    )
-    
-    # KPIs Row
+    st.title("⚡ Quant Metrics Intelligence Terminal")
     st.divider()
-    kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5, kpi_col6 = st.columns(6)
     
-    # Compute KPIs
+    k_col1, k_col2, k_col3, k_col4, k_col5, k_col6 = st.columns(6)
     total_pnl = df_realized['Closed PnL'].sum()
     win_rate = df_realized['win_flag'].mean() * 100 if len(df_realized) > 0 else 0
     total_trades = len(df_realized)
     total_volume = df_realized['Size USD'].sum()
     avg_leverage = df_filtered['leverage'].mean()
     
-    # Profit Factor
     pos_pnl = df_realized[df_realized['Closed PnL'] > 0]['Closed PnL'].sum()
     neg_pnl = df_realized[df_realized['Closed PnL'] < 0]['Closed PnL'].sum()
     profit_factor = pos_pnl / abs(neg_pnl) if neg_pnl != 0 else np.nan
     
-    with kpi_col1:
-        st.metric(
-            label="Realized PnL (USD)",
-            value=f"${total_pnl:,.2f}",
-            delta=f"{'+' if total_pnl >= 0 else ''}{total_pnl/1e6:.2f}M",
-            delta_color="normal"
-        )
-    with kpi_col2:
-        st.metric(
-            label="Aggregate Win Rate",
-            value=f"{win_rate:.2f}%",
-            delta="Benchmark: 55%" if win_rate > 55 else "Sub-optimal",
-            delta_color="inverse" if win_rate < 50 else "normal"
-        )
-    with kpi_col3:
-        pf_val = f"{profit_factor:.2f}" if pd.notnull(profit_factor) else "N/A"
-        st.metric(
-            label="Profit Factor",
-            value=pf_val,
-            delta="Institutional" if profit_factor > 2.0 else "Speculative"
-        )
-    with kpi_col4:
-        st.metric(
-            label="Total Volume Traded",
-            value=f"${total_volume/1e6:.2f}M"
-        )
-    with kpi_col5:
-        st.metric(
-            label="Avg Effective Leverage",
-            value=f"{avg_leverage:.2f}x"
-        )
-    with kpi_col6:
-        st.metric(
-            label="Realized Trades Count",
-            value=f"{total_trades:,}"
-        )
+    with k_col1: st.metric("Realized PnL (USD)", f"${total_pnl:,.2f}")
+    with k_col2: st.metric("Aggregate Win Rate", f"{win_rate:.2f}%")
+    with k_col3: st.metric("Profit Factor", f"{profit_factor:.2f}" if pd.notnull(profit_factor) else "N/A")
+    with k_col4: st.metric("Total Volume Traded", f"${total_volume/1e6:.2f}M")
+    with k_col5: st.metric("Avg Effective Leverage", f"{avg_leverage:.2f}x")
+    with k_col6: st.metric("Realized Trades Count", f"{total_trades:,}")
     st.divider()
     
-    # -------------------------------------------------------------
-    # Navigation Tabs
-    # -------------------------------------------------------------
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📊 Profitability & Sentiment", 
-        "⚙️ Leverage & Risk Mechanics", 
-        "⏱️ Activity & Sizing", 
-        "👥 Trader Segments", 
-        "🔮 Algorithmic Predictive Sandbox"
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "📊 Profitability & Sentiment", "⚙️ Leverage & Risk Mechanics", "⏱️ Activity & Sizing", 
+        "👥 Trader Segments", "🔮 Algorithmic Predictive Sandbox", "📈 Portfolio Sizing Simulation"
     ])
     
-    # -------------------------------------------------------------
-    # Tab 1: Profitability & Sentiment
-    # -------------------------------------------------------------
     with tab1:
         st.subheader("Profitability & Win Rates across Market Sentiment States")
-        st.markdown(
-            "We analyze the realized performance of traders under the 5 stages of the Bitcoin Fear & Greed Index. "
-            "Notice the dynamic shift in profitability from Fear to Extreme Greed."
-        )
-        
         col_t1_l, col_t1_r = st.columns(2)
-        
         with col_t1_l:
-            # Group by Sentiment for Plotting
-            sent_perf = df_realized.groupby('sentiment_class').agg(
-                total_pnl=('Closed PnL', 'sum'),
-                win_rate=('win_flag', 'mean'),
-                trade_count=('Closed PnL', 'count')
-            ).reset_index()
-            
-            # Reorder for logical plotting
-            sent_perf['sentiment_class'] = pd.Categorical(
-                sent_perf['sentiment_class'], categories=all_sentiments, ordered=True
-            )
+            sent_perf = df_realized.groupby('sentiment_class').agg(total_pnl=('Closed PnL', 'sum')).reset_index()
+            sent_perf['sentiment_class'] = pd.Categorical(sent_perf['sentiment_class'], categories=all_sentiments, ordered=True)
             sent_perf = sent_perf.sort_values('sentiment_class')
-            
-            # PnL Chart
-            fig_pnl = px.bar(
-                sent_perf,
-                x='sentiment_class',
-                y='total_pnl',
-                title="Total Realized PnL ($) by Sentiment State",
-                labels={'total_pnl': 'Total PnL (USD)', 'sentiment_class': 'Market Sentiment'},
-                color='total_pnl',
-                color_continuous_scale=px.colors.diverging.RdYlGn,
-                template="plotly_dark"
-            )
-            fig_pnl.update_layout(showlegend=False)
+            fig_pnl = px.bar(sent_perf, x='sentiment_class', y='total_pnl', title="Total Realized PnL ($) by Sentiment State", color='total_pnl', color_continuous_scale=px.colors.diverging.RdYlGn, template="plotly_dark")
             st.plotly_chart(fig_pnl, use_container_width=True)
-            
         with col_t1_r:
-            # Win Rate Chart
-            sent_perf['win_rate_pct'] = sent_perf['win_rate'] * 100
-            fig_wr = px.line(
-                sent_perf,
-                x='sentiment_class',
-                y='win_rate_pct',
-                title="Aggregate Win Rate (%) by Sentiment State",
-                labels={'win_rate_pct': 'Win Rate (%)', 'sentiment_class': 'Market Sentiment'},
-                markers=True,
-                template="plotly_dark"
-            )
-            fig_wr.update_traces(line=dict(color='#58a6ff', width=3))
-            fig_wr.update_yaxes(range=[40, 100])
+            sent_perf_wr = df_realized.groupby('sentiment_class').agg(win_rate=('win_flag', 'mean')).reset_index()
+            sent_perf_wr['win_rate_pct'] = sent_perf_wr['win_rate'] * 100
+            sent_perf_wr['sentiment_class'] = pd.Categorical(sent_perf_wr['sentiment_class'], categories=all_sentiments, ordered=True)
+            sent_perf_wr = sent_perf_wr.sort_values('sentiment_class')
+            fig_wr = px.line(sent_perf_wr, x='sentiment_class', y='win_rate_pct', title="Aggregate Win Rate (%) by Sentiment State", markers=True, template="plotly_dark")
             st.plotly_chart(fig_wr, use_container_width=True)
             
-        st.subheader("💡 Quantitative Insights")
-        if not sent_perf.empty:
-            max_pnl_idx = sent_perf['total_pnl'].idxmax()
-            min_pnl_idx = sent_perf['total_pnl'].idxmin()
-            top_sent = sent_perf.loc[max_pnl_idx, 'sentiment_class']
-            top_pnl = sent_perf.loc[max_pnl_idx, 'total_pnl']
-            bot_sent = sent_perf.loc[min_pnl_idx, 'sentiment_class']
-            bot_pnl = sent_perf.loc[min_pnl_idx, 'total_pnl']
-            
-            st.markdown(
-                f"""
-                <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border-left: 4px solid #58a6ff;">
-                    <b>Dynamic PnL Extremes:</b><br/>
-                    • <b>Most Profitable Environment:</b> {top_sent} (${top_pnl:,.2f})<br/>
-                    • <b>Least Profitable Environment:</b> {bot_sent} (${bot_pnl:,.2f})<br/>
-                    <i style="color:#8b949e; font-size: 0.85em;">(Values automatically update based on active filters)</i>
-                </div>
-                """, unsafe_allow_html=True
-            )
-        
-    # -------------------------------------------------------------
-    # Tab 2: Leverage & Risk Mechanics
-    # -------------------------------------------------------------
     with tab2:
-        st.subheader("Leverage Mechanics and Tail-Risk Patterns")
-        st.markdown(
-            "Crypto perpetual exchanges offer high leverage. Let's inspect the actual impact of leverage on trading outcome "
-            "and tail risk."
-        )
-        
+        st.subheader("Leverage Mechanics and Advanced Quantitative Risk Analytics")
+        df_risk_report = generate_risk_metrics_report(df_filtered, group_col='sentiment_class')
+        if not df_risk_report.empty:
+            st.dataframe(df_risk_report, use_container_width=True)
+            st.divider()
         col_t2_l, col_t2_r = st.columns(2)
-        
         with col_t2_l:
-            # Leverage Binned Performance
-            lev_perf = df_realized.groupby('leverage_bucket').agg(
-                avg_pnl=('Closed PnL', 'mean'),
-                win_rate=('win_flag', 'mean'),
-                total_pnl=('Closed PnL', 'sum')
-            ).reset_index()
-            
-            fig_lev_pnl = px.bar(
-                lev_perf,
-                x='leverage_bucket',
-                y='total_pnl',
-                title="Total PnL ($) by Leverage Bucket",
-                labels={'total_pnl': 'Total PnL (USD)', 'leverage_bucket': 'Leverage Bucket'},
-                color='total_pnl',
-                color_continuous_scale='Tealgrn',
-                template="plotly_dark"
-            )
+            lev_perf = df_realized.groupby('leverage_bucket').agg(total_pnl=('Closed PnL', 'sum')).reset_index()
+            fig_lev_pnl = px.bar(lev_perf, x='leverage_bucket', y='total_pnl', title="Total PnL ($) by Leverage Bucket", color='total_pnl', color_continuous_scale='Tealgrn', template="plotly_dark")
             st.plotly_chart(fig_lev_pnl, use_container_width=True)
-            
         with col_t2_r:
-            # Value at Risk by Sentiment (VaR 95% & VaR 99%) calculated dynamically
-            risk_stats = []
-            for sent in all_sentiments:
-                df_sent = df_realized[df_realized['sentiment_class'] == sent]
-                if len(df_sent) > 0:
-                    var_95 = np.percentile(df_sent['Closed PnL'], 5)
-                    var_99 = np.percentile(df_sent['Closed PnL'], 1)
-                    risk_stats.append({
-                        'sentiment_class': sent,
-                        'var_95': abs(var_95),
-                        'var_99': abs(var_99)
-                    })
-            if risk_stats:
-                df_risk_dyn = pd.DataFrame(risk_stats)
+            if not df_risk_report.empty:
                 fig_risk = go.Figure(data=[
-                    go.Bar(name='VaR 95% (USD Downside)', x=df_risk_dyn['sentiment_class'], y=df_risk_dyn['var_95'], marker_color='#ff7f0e'),
-                    go.Bar(name='VaR 99% (Extreme Tail Downside)', x=df_risk_dyn['sentiment_class'], y=df_risk_dyn['var_99'], marker_color='#d62728')
+                    go.Bar(name='VaR 95%', x=df_risk_report['sentiment_class'], y=df_risk_report['var_95'].abs(), marker_color='#ff7f0e'),
+                    go.Bar(name='CVaR 95%', x=df_risk_report['sentiment_class'], y=df_risk_report['cvar_95'].abs(), marker_color='#d62728')
                 ])
-                fig_risk.update_layout(
-                    title="Value at Risk (VaR) Downside Bounds by Sentiment State",
-                    xaxis_title="Market Sentiment",
-                    yaxis_title="Potential Downside Loss (USD)",
-                    template="plotly_dark"
-                )
+                fig_risk.update_layout(title="Value at Risk vs. Expected Shortfall (CVaR)", template="plotly_dark")
                 st.plotly_chart(fig_risk, use_container_width=True)
-            else:
-                st.write("No realized trades for the selected filters to perform risk analysis.")
                 
-        st.subheader("💡 Tail-Risk & Leverage Insights")
-        if not lev_perf.empty and len(risk_stats) > 0:
-            low_lev_pnl = lev_perf[lev_perf['leverage_bucket'] == 'Low Leverage (1x-3x)']['total_pnl'].sum() if 'Low Leverage (1x-3x)' in lev_perf['leverage_bucket'].values else 0
-            ext_lev_pnl = lev_perf[lev_perf['leverage_bucket'] == 'Extreme Leverage (21x-50x)']['total_pnl'].sum() if 'Extreme Leverage (21x-50x)' in lev_perf['leverage_bucket'].values else 0
-            max_risk_sent = df_risk_dyn.loc[df_risk_dyn['var_99'].idxmax(), 'sentiment_class']
-            max_risk_val = df_risk_dyn['var_99'].max()
-            
-            st.markdown(
-                f"""
-                <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border-left: 4px solid #f85149;">
-                    <b>Risk & Reward Imbalance:</b><br/>
-                    • <b>Low Leverage (1x-3x) PnL:</b> ${low_lev_pnl:,.2f}<br/>
-                    • <b>Extreme Leverage (21x-50x) PnL:</b> ${ext_lev_pnl:,.2f}<br/>
-                    • <b>Maximum Downside Exposure (VaR 99%):</b> {max_risk_sent} (${max_risk_val:,.2f})<br/>
-                    <i style="color:#8b949e; font-size: 0.85em;">(Values automatically update based on active filters)</i>
-                </div>
-                """, unsafe_allow_html=True
-            )
-
-    # -------------------------------------------------------------
-    # Tab 3: Activity & Sizing
-    # -------------------------------------------------------------
     with tab3:
-        st.subheader("Trading Frequency and Position Sizing Volatility")
-        st.markdown(
-            "How do traders adjust their behavior (trade frequency and size) under different sentiment environments?"
-        )
-        
+        st.subheader("Trading Sizing and Frequency Dynamics")
         col_t3_l, col_t3_r = st.columns(2)
-        
-        # Compute frequency and sizing dynamically
         days_per_sent = df_filtered.groupby('sentiment_class')['date'].nunique()
-        df_freq_dyn = df_filtered.groupby('sentiment_class').agg(
-            total_trades=('Trade ID', 'count'),
-            avg_trade_size=('Size USD', 'mean')
-        ).reset_index()
-        df_freq_dyn['unique_days'] = df_freq_dyn['sentiment_class'].map(days_per_sent)
-        # Avoid division by zero
-        df_freq_dyn['avg_trades_per_day'] = np.where(
-            df_freq_dyn['unique_days'] > 0,
-            df_freq_dyn['total_trades'] / df_freq_dyn['unique_days'],
-            0.0
-        )
-        
-        # Sort by sentiment order
-        df_freq_dyn['sentiment_class'] = pd.Categorical(
-            df_freq_dyn['sentiment_class'], categories=all_sentiments, ordered=True
-        )
-        df_freq_dyn = df_freq_dyn.sort_values('sentiment_class')
-        
+        df_freq = df_filtered.groupby('sentiment_class').agg(total_trades=('Trade ID', 'count'), avg_trade_size=('Size USD', 'mean')).reset_index()
+        df_freq['unique_days'] = df_freq['sentiment_class'].map(days_per_sent)
+        df_freq['avg_trades_per_day'] = df_freq['total_trades'] / df_freq['unique_days']
+        df_freq['sentiment_class'] = pd.Categorical(df_freq['sentiment_class'], categories=all_sentiments, ordered=True)
+        df_freq = df_freq.sort_values('sentiment_class')
         with col_t3_l:
-            # Trading frequency chart
-            fig_freq = px.bar(
-                df_freq_dyn,
-                x='sentiment_class',
-                y='avg_trades_per_day',
-                title="Average Trades Per Day by Sentiment State",
-                labels={'avg_trades_per_day': 'Avg Trades / Day', 'sentiment_class': 'Market Sentiment'},
-                color='avg_trades_per_day',
-                color_continuous_scale='Mint',
-                template="plotly_dark"
-            )
-            st.plotly_chart(fig_freq, use_container_width=True)
-            
+            fig_f = px.bar(df_freq, x='sentiment_class', y='avg_trades_per_day', title="Average Trades Per Day", template="plotly_dark")
+            st.plotly_chart(fig_f, use_container_width=True)
         with col_t3_r:
-            # Average position sizing
-            fig_size = px.line(
-                df_freq_dyn,
-                x='sentiment_class',
-                y='avg_trade_size',
-                title="Average Trade Size ($ USD) by Sentiment State",
-                labels={'avg_trade_size': 'Avg Trade Size (USD)', 'sentiment_class': 'Market Sentiment'},
-                markers=True,
-                template="plotly_dark"
-            )
-            fig_size.update_traces(line=dict(color='#ff7f0e', width=3))
-            st.plotly_chart(fig_size, use_container_width=True)
+            fig_s = px.line(df_freq, x='sentiment_class', y='avg_trade_size', title="Average Position Sizing (USD)", markers=True, template="plotly_dark")
+            st.plotly_chart(fig_s, use_container_width=True)
             
-        st.subheader("💡 Sizing & Frequency Takeaways")
-        if not df_freq_dyn.empty:
-            max_freq_idx = df_freq_dyn['avg_trades_per_day'].idxmax()
-            min_freq_idx = df_freq_dyn['avg_trades_per_day'].idxmin()
-            high_freq_sent = df_freq_dyn.loc[max_freq_idx, 'sentiment_class']
-            high_freq_val = df_freq_dyn.loc[max_freq_idx, 'avg_trades_per_day']
-            low_freq_sent = df_freq_dyn.loc[min_freq_idx, 'sentiment_class']
-            low_freq_val = df_freq_dyn.loc[min_freq_idx, 'avg_trades_per_day']
-            
-            st.markdown(
-                f"""
-                <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border-left: 4px solid #39d353;">
-                    <b>Trading Activity Spikes:</b><br/>
-                    • <b>Peak Hyper-Activity:</b> {high_freq_sent} ({high_freq_val:,.0f} trades/day)<br/>
-                    • <b>Lowest Activity Phase (HODL):</b> {low_freq_sent} ({low_freq_val:,.0f} trades/day)<br/>
-                    <i style="color:#8b949e; font-size: 0.85em;">(Values automatically update based on active filters)</i>
-                </div>
-                """, unsafe_allow_html=True
-            )
-
-    # -------------------------------------------------------------
-    # Tab 4: Trader Segments
-    # -------------------------------------------------------------
     with tab4:
         st.subheader("Algorithmic Trader Segmentation (K-Means Personas)")
-        st.markdown(
-            "Using unsupervised learning (K-Means clustering), we analyzed the 32 historical wallets and segmented them "
-            "into 4 distinct profiles based on profitability, size, leverage, win rates, and directional bias."
-        )
-        
         if df_segments is not None:
-            # Filter df_segments dynamically by active trader accounts selected in sidebar
-            df_seg_filtered = df_segments.copy()
-            if selected_accounts:
-                df_seg_filtered = df_seg_filtered[df_seg_filtered['Account'].isin(selected_accounts)]
-                
-            col_t4_l, col_t4_r = st.columns([1, 1])
-            
+            col_t4_l, col_t4_r = st.columns(2)
             with col_t4_l:
-                # Segment Distribution Pie Chart
-                seg_counts = df_seg_filtered['trader_segment'].value_counts().reset_index()
+                seg_counts = df_segments['trader_segment'].value_counts().reset_index()
                 seg_counts.columns = ['Segment', 'Count']
-                fig_seg = px.pie(
-                    seg_counts,
-                    values='Count',
-                    names='Segment',
-                    title="Trader Segments Population Distribution",
-                    color_discrete_sequence=px.colors.qualitative.Pastel,
-                    template="plotly_dark"
-                )
-                fig_seg.update_traces(textposition='inside', textinfo='percent+label')
-                st.plotly_chart(fig_seg, use_container_width=True)
-                
+                fig_p = px.pie(seg_counts, values='Count', names='Segment', title="Trader Segments Population Distribution", template="plotly_dark")
+                st.plotly_chart(fig_p, use_container_width=True)
             with col_t4_r:
-                # Segments Performance comparison
-                seg_perf = df_seg_filtered.groupby('trader_segment').agg(
-                    total_pnl=('total_pnl', 'mean'),
-                    avg_leverage=('avg_leverage', 'mean'),
-                    win_rate=('win_rate', 'mean')
-                ).reset_index()
-                seg_perf['win_rate_pct'] = seg_perf['win_rate'] * 100
-                
-                fig_seg_perf = px.bar(
-                    seg_perf,
-                    x='trader_segment',
-                    y='total_pnl',
-                    title="Average Trader Lifetime Profitability ($) by Segment",
-                    labels={'total_pnl': 'Avg Lifetime PnL (USD)', 'trader_segment': 'Trader Segment'},
-                    color='avg_leverage',
-                    color_continuous_scale='Viridis',
-                    template="plotly_dark"
-                )
-                st.plotly_chart(fig_seg_perf, use_container_width=True)
-                
-            st.subheader("Wallet Intelligence Ledger")
-            # Show a table with the accounts and segments
-            df_display_segments = df_seg_filtered[['Account', 'trader_segment', 'total_pnl', 'win_rate', 'avg_leverage', 'avg_trade_size', 'trade_count', 'profit_factor']].copy()
-            df_display_segments['total_pnl'] = df_display_segments['total_pnl'].map(lambda x: f"${x:,.2f}")
-            df_display_segments['win_rate'] = df_display_segments['win_rate'].map(lambda x: f"{x*100:.2f}%")
-            df_display_segments['avg_leverage'] = df_display_segments['avg_leverage'].map(lambda x: f"{x:.2f}x")
-            df_display_segments['avg_trade_size'] = df_display_segments['avg_trade_size'].map(lambda x: f"${x:,.2f}")
+                seg_perf = df_segments.groupby('trader_segment').agg(total_pnl=('total_pnl', 'mean')).reset_index()
+                fig_bp = px.bar(seg_perf, x='trader_segment', y='total_pnl', title="Average Lifetime Profitability ($) by Segment", template="plotly_dark")
+                st.plotly_chart(fig_bp, use_container_width=True)
+            st.dataframe(df_segments, use_container_width=True)
             
-            st.dataframe(df_display_segments, use_container_width=True)
-        else:
-            st.write("Clustering segmentation dataset not found.")
-
-    # -------------------------------------------------------------
-    # Tab 5: Algorithmic Predictive Sandbox
-    # -------------------------------------------------------------
     with tab5:
-        st.subheader("Trade Profitability Predictor Sandbox")
-        st.markdown(
-            "Based on our trained **Random Forest Classifier (Accuracy: 84.97%, ROC-AUC: 0.90)**, "
-            "this simulator allows you to input current trade parameters and estimate the probability that the trade will be profitable."
-        )
-        
-        sandbox_col1, sandbox_col2 = st.columns([1, 1])
-        
+        st.subheader("Trade Profitability Predictor Sandbox & SHAP Explainability")
+        sandbox_col1, sandbox_col2 = st.columns([1, 1.2])
         with sandbox_col1:
             st.write("### 🎛️ Trade Parameter Terminals")
-            
-            input_coin = st.selectbox("Symbol / Coin", options=all_coins, index=all_coins.index("SOL") if "SOL" in all_coins else 0)
+            input_coin = st.selectbox("Symbol / Coin", options=all_coins, index=0)
             input_direction = st.selectbox("Trade Direction", options=['Long', 'Short'])
-            input_size = st.number_input("Trade Size (USD)", min_value=10.0, max_value=1000000.0, value=5000.0, step=500.0)
+            input_size = st.number_input("Trade Size (USD)", min_value=10.0, max_value=1000000.0, value=5000.0)
             input_leverage = st.slider("Leverage Used", min_value=1, max_value=50, value=5)
-            input_sentiment = st.slider("Bitcoin Fear & Greed Score (0 - 100)", min_value=0, max_value=100, value=50)
-            input_hour = st.slider("Execution Hour (IST, 0 - 23)", min_value=0, max_value=23, value=12)
+            input_sentiment = st.slider("Fear & Greed Index Score", min_value=0, max_value=100, value=50)
+            input_hour = st.slider("Execution Hour", min_value=0, max_value=23, value=12)
             input_day = st.selectbox("Execution Day", options=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-            
-            # Predict Button
             predict_triggered = st.button("🚀 Run Predictive Classifier")
-            
         with sandbox_col2:
-            st.write("### 🔮 Classification Analysis & Diagnostics")
-            
-            if predict_triggered:
-                if rf_model is not None and training_features is not None:
-                    # Construct single-row DataFrame representing the trade input
-                    input_df = pd.DataFrame([{
-                        'leverage': float(input_leverage),
-                        'Size USD': float(input_size),
-                        'sentiment_score': float(input_sentiment),
-                        'trade_direction': input_direction,
-                        'hour': int(input_hour),
-                        'day_of_week': input_day,
-                        'Coin': input_coin
-                    }])
-                    
-                    # Perform one-hot encoding
-                    input_encoded = pd.get_dummies(input_df, columns=['trade_direction', 'day_of_week', 'Coin'])
-                    
-                    # Align columns exactly with the trained feature list
-                    aligned_data = {}
-                    for col in training_features:
-                        if col in input_encoded.columns:
-                            aligned_data[col] = input_encoded[col].iloc[0]
-                        else:
-                            aligned_data[col] = 0.0
-                            
-                    # Construct the final aligned features DataFrame
-                    X_input = pd.DataFrame([aligned_data])[training_features]
-                    
-                    # Compute win probability via Random Forest model
-                    prob_win = float(rf_model.predict_proba(X_input)[0, 1])
-                    
-                    st.markdown(f"**Predicted Profitability (Win Probability):**")
-                    if prob_win >= 0.55:
-                        st.success(f"🏆 HIGH WIN PROBABILITY: {prob_win*100:.2f}%")
-                    elif prob_win >= 0.45:
-                        st.info(f"⚖️ NEUTRAL PROBABILITY: {prob_win*100:.2f}%")
-                    else:
-                        st.error(f"⚠️ HIGH RISK / LOW WIN PROBABILITY: {prob_win*100:.2f}%")
-                        
-                    # Visual Gauge
-                    fig_gauge = go.Figure(go.Indicator(
-                        mode = "gauge+number",
-                        value = prob_win * 100,
-                        domain = {'x': [0, 1], 'y': [0, 1]},
-                        title = {'text': "Asymmetric Edge Score (%)", 'font': {'size': 20}},
-                        gauge = {
-                            'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "white"},
-                            'bar': {'color': "#58a6ff"},
-                            'bgcolor': "#161b22",
-                            'borderwidth': 2,
-                            'bordercolor': "#30363d",
-                            'steps': [
-                                {'range': [0, 45], 'color': '#ff4b4b'},
-                                {'range': [45, 55], 'color': '#f1c40f'},
-                                {'range': [55, 100], 'color': '#2ecc71'}
-                            ],
-                            'threshold': {
-                                'line': {'color': "white", 'width': 4},
-                                'thickness': 0.75,
-                                'value': 55
-                            }
-                        }
-                    ))
-                    fig_gauge.update_layout(
-                        paper_bgcolor='rgba(0,0,0,0)',
-                        plot_bgcolor='rgba(0,0,0,0)',
-                        font={'color': "white", 'family': "Arial"},
-                        height=250
-                    )
-                    st.plotly_chart(fig_gauge, use_container_width=True)
-                    
-                    # Dynamic recommendation based on actual model outcomes
-                    st.write("### 📋 Quant Diagnostics Recommendation:")
-                    if prob_win >= 0.55:
-                        st.markdown(
-                            "👉 **Decision:** **APPROVED FOR EXECUTION**\n"
-                            "This trade represents a structurally sound, low-leverage trade executed in favorable sentiment environments. "
-                            "Downside Value at Risk (VaR) is tightly bounded. Proceed with standard size."
-                        )
-                    else:
-                        st.markdown(
-                            "👉 **Decision:** **REJECTED OR SIZE DOWN**\n"
-                            "This trade exhibits critical behavioral flaws: either leverage is too high, or you are "
-                            "trading in highly unfavorable sentiment regimes (such as shorting high momentum, or buying capitulations "
-                            "with high leverage). Reduce leverage to <3x or skip the trade."
-                        )
-                else:
-                    st.write("Predictive classifier model is missing. Please run modeling script first.")
-            else:
-                st.info("Input trade parameters and click 'Run Predictive Classifier' to calculate the trade score.")
+            if predict_triggered and rf_model is not None:
+                input_df = pd.DataFrame([{
+                    'leverage': float(input_leverage), 'Size USD': float(input_size), 'sentiment_score': float(input_sentiment),
+                    'trade_direction': input_direction, 'hour': int(input_hour), 'day_of_week': input_day, 'Coin': input_coin
+                }])
+                input_encoded = pd.get_dummies(input_df, columns=['trade_direction', 'day_of_week', 'Coin'])
+                aligned_data = {col: float(input_encoded[col].iloc[0]) if col in input_encoded.columns else 0.0 for col in training_features}
+                X_input = pd.DataFrame([aligned_data])[training_features]
                 
-            # Feature Importance Panel
-            if df_importance is not None:
-                st.divider()
-                st.write("### 📈 Top 10 Profitability Drivers (Random Forest Feature Importance)")
-                fig_imp = px.bar(
-                    df_importance.head(10),
-                    x='importance',
-                    y='feature',
-                    orientation='h',
-                    title="Feature Importances in Profitability Classifier",
-                    labels={'importance': 'Feature Weight', 'feature': 'Trading Metric'},
-                    color='importance',
-                    color_continuous_scale='Blues',
-                    template="plotly_dark"
-                )
-                fig_imp.update_layout(yaxis={'categoryorder':'total ascending'})
-                st.plotly_chart(fig_imp, use_container_width=True)
+                prob_win = float(rf_model.predict_proba(X_input)[0, 1])
+                st.metric("Win Probability Score", f"{prob_win*100:.2f}%")
+                
+                st.subheader("🧬 Local Feature Impact (SHAP Explanation)")
+                df_local_shap = explainer.explain_local_prediction(X_input)
+                if not df_local_shap.empty:
+                    df_local_shap['feature_display'] = df_local_shap['feature'] + " (" + df_local_shap['feature_value'].astype(str) + ")"
+                    fig_local = px.bar(df_local_shap.head(8), x='shap_value', y='feature_display', orientation='h', color='shap_value', color_continuous_scale=px.colors.diverging.RdYlGn, template="plotly_dark")
+                    st.plotly_chart(fig_local, use_container_width=True)
+                    
+    with tab6:
+        st.subheader("Portfolio Capital Allocation Sizing Simulator")
+        if df_portfolio_sim is not None and not df_portfolio_sim.empty:
+            fig_sim = px.line(df_portfolio_sim, x='timestamp', y=['Baseline_Fixed', 'Fixed_Fractional_2pct', 'Dynamic_Sentiment_Kelly'], title="Sizing Trajectories ($100k Bankroll)", template="plotly_dark")
+            st.plotly_chart(fig_sim, use_container_width=True)
+
+# -------------------------------------------------------------
+# Screen 2: Behavioral Finance (NEW - Phase 4)
+# -------------------------------------------------------------
+elif page == "🧠 Behavioral Finance" and df_behavioral is not None:
+    st.title("🧠 Behavioral Finance Intelligence")
+    st.markdown("Visualizes dynamic cognitive trading biases (FOMO, Panic Selling, Overconfidence, and Loss Chasing).")
+    
+    # KPIs for overall cognitive biases
+    b_col1, b_col2, b_col3, b_col4 = st.columns(4)
+    fomo_count = int(df_behavioral['fomo_bias'].sum())
+    panic_count = int(df_behavioral['panic_bias'].sum())
+    over_count = int(df_behavioral['overconfidence_bias'].sum())
+    chase_count = int(df_behavioral['loss_chasing_bias'].sum())
+    
+    with b_col1: st.metric("FOMO Biased Accounts", f"{fomo_count} / {len(df_behavioral)}")
+    with b_col2: st.metric("Panic Selling Wallets", f"{panic_count} / {len(df_behavioral)}")
+    with b_col3: st.metric("Overconfident Traders", f"{over_count} / {len(df_behavioral)}")
+    with b_col4: st.metric("Loss Chasing (Martingale)", f"{chase_count} / {len(df_behavioral)}")
+    st.divider()
+    
+    col_beh_l, col_beh_r = st.columns([1, 1.2])
+    
+    with col_beh_l:
+        st.subheader("Biases Prevalence Distribution")
+        bias_melted = df_behavioral.melt(value_vars=['fomo_bias', 'panic_bias', 'overconfidence_bias', 'loss_chasing_bias'], var_name='bias_type', value_name='flag')
+        bias_aggregates = bias_melted[bias_melted['flag'] == 1]['bias_type'].value_counts().reset_index()
+        bias_aggregates.columns = ['Cognitive Bias', 'Wallets Count']
+        
+        fig_bias_pie = px.pie(bias_aggregates, values='Wallets Count', names='Cognitive Bias', title="Prevalence proportion of biases", template="plotly_dark")
+        st.plotly_chart(fig_bias_pie, use_container_width=True)
+        
+    with col_beh_r:
+        st.subheader("Behavioral Risk Scores Ranking (0 - 100)")
+        df_sorted_risk = df_behavioral[['Account', 'behavioral_risk_score', 'trader_archetype']].sort_values('behavioral_risk_score', ascending=False)
+        fig_risk_bar = px.bar(
+            df_sorted_risk.head(15),
+            x='behavioral_risk_score',
+            y='Account',
+            color='trader_archetype',
+            orientation='h',
+            title="Top 15 Most Biased/Risky Wallets",
+            template="plotly_dark"
+        )
+        st.plotly_chart(fig_risk_bar, use_container_width=True)
+
+# -------------------------------------------------------------
+# Screen 3: Trader Personas (NEW - Phase 4)
+# -------------------------------------------------------------
+elif page == "👥 Trader Personas" and df_behavioral is not None:
+    st.title("👥 Trader Personas & Archetypes")
+    st.markdown("Details wallet mapping results across the 6 professional quantitative archetypes.")
+    
+    col_per_l, col_per_r = st.columns([1, 1.2])
+    
+    with col_per_l:
+        st.subheader("Archetypes Population Breakdown")
+        archetype_counts = df_behavioral['trader_archetype'].value_counts().reset_index()
+        archetype_counts.columns = ['Trader Archetype', 'Count']
+        
+        fig_arc_pie = px.pie(
+            archetype_counts, 
+            values='Count', 
+            names='Trader Archetype', 
+            title="Ecosystem Persona Distribution",
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+            template="plotly_dark"
+        )
+        st.plotly_chart(fig_arc_pie, use_container_width=True)
+        
+    with col_per_r:
+        st.subheader("Average Realized Profitability by Archetype")
+        arc_perf = df_behavioral.groupby('trader_archetype')['total_realized_pnl'].mean().reset_index().sort_values('total_realized_pnl', ascending=False)
+        
+        fig_arc_perf = px.bar(
+            arc_perf,
+            x='trader_archetype',
+            y='total_realized_pnl',
+            color='total_realized_pnl',
+            color_continuous_scale=px.colors.diverging.RdYlGn,
+            title="Average Lifetime PnL ($) per Archetype",
+            labels={'total_realized_pnl': 'Avg Lifetime PnL (USD)', 'trader_archetype': 'Trader Archetype'},
+            template="plotly_dark"
+        )
+        st.plotly_chart(fig_arc_perf, use_container_width=True)
+        
+    st.subheader("Behavioral Wallet Intelligence Ledger")
+    df_disp_personas = df_behavioral[['Account', 'trader_archetype', 'behavioral_risk_score', 'total_realized_pnl', 'win_rate', 'avg_leverage', 'avg_trade_size', 'trade_count']].copy()
+    df_disp_personas['total_realized_pnl'] = df_disp_personas['total_realized_pnl'].map(lambda x: f"${x:,.2f}")
+    df_disp_personas['win_rate'] = df_disp_personas['win_rate'].map(lambda x: f"{x*100:.2f}%")
+    df_disp_personas['avg_leverage'] = df_disp_personas['avg_leverage'].map(lambda x: f"{x:.2f}x")
+    df_disp_personas['avg_trade_size'] = df_disp_personas['avg_trade_size'].map(lambda x: f"${x:,.2f}")
+    
+    st.dataframe(df_disp_personas, use_container_width=True)
+
+# -------------------------------------------------------------
+# Screen 4: Risk Intelligence (NEW - Phase 4)
+# -------------------------------------------------------------
+elif page == "🛡️ Risk Intelligence" and df_raw is not None:
+    st.title("🛡️ Risk Intelligence Terminal")
+    st.markdown("Consolidates portfolio Sharpe, Sortino, Calmar ratios, maximum drawdowns, and regime analytics.")
+    
+    df_risk_report = generate_risk_metrics_report(df_raw, group_col='sentiment_class')
+    
+    if not df_risk_report.empty:
+        st.subheader("Macro Sentiment-Driven Risk Matrix")
+        df_disp_risk = df_risk_report.copy()
+        df_disp_risk['volatility'] = df_disp_risk['volatility'].map(lambda x: f"{x*100:.2f}%")
+        df_disp_risk['max_drawdown_roe'] = df_disp_risk['max_drawdown_roe'].map(lambda x: f"{x*100:.2f}%")
+        df_disp_risk['sharpe_ratio'] = df_disp_risk['sharpe_ratio'].map(lambda x: f"{x:.4f}")
+        df_disp_risk['sortino_ratio'] = df_disp_risk['sortino_ratio'].map(lambda x: f"{x:.4f}")
+        df_disp_risk['calmar_ratio'] = df_disp_risk['calmar_ratio'].map(lambda x: f"{x:.4f}")
+        df_disp_risk['var_95'] = df_disp_risk['var_95'].map(lambda x: f"${x:,.2f}")
+        df_disp_risk['cvar_95'] = df_disp_risk['cvar_95'].map(lambda x: f"${x:,.2f}")
+        df_disp_risk['cvar_99'] = df_disp_risk['cvar_99'].map(lambda x: f"${x:,.2f}")
+        
+        st.dataframe(df_disp_risk, use_container_width=True)
+        st.divider()
+        
+        col_risk_l, col_risk_r = st.columns(2)
+        
+        with col_risk_l:
+            st.subheader("Ratios Comparison (Sharpe vs Sortino)")
+            fig_ratios = go.Figure(data=[
+                go.Bar(name='Sharpe Ratio', x=df_risk_report['sentiment_class'], y=df_risk_report['sharpe_ratio'], marker_color='#3498db'),
+                go.Bar(name='Sortino Ratio', x=df_risk_report['sentiment_class'], y=df_risk_report['sortino_ratio'], marker_color='#2ecc71')
+            ])
+            fig_ratios.update_layout(title="Annualized Risk-Adjusted Ratios per FGI State", template="plotly_dark")
+            st.plotly_chart(fig_ratios, use_container_width=True)
+            
+        with col_risk_r:
+            st.subheader("Maximum Downside Drawdowns ($ USD)")
+            fig_dd = px.bar(
+                df_risk_report,
+                x='sentiment_class',
+                y='max_drawdown_usd',
+                title="Max Historical Dollar Drawdown by Sentiment class",
+                color='max_drawdown_usd',
+                color_continuous_scale='Reds_r',
+                template="plotly_dark"
+            )
+            st.plotly_chart(fig_dd, use_container_width=True)
+
+# -------------------------------------------------------------
+# NLP Sub-Pages (Existing - Backward Compatible)
+# -------------------------------------------------------------
+elif page == "📰 News Intelligence" and df_nlp_scores is not None:
+    st.title("📰 News Intelligence Terminal")
+    col_n1, col_n2 = st.columns([2, 1])
+    with col_n1:
+        st.subheader("Latest Preprocessed Market Articles")
+        news_dir = "data/silver/news_clean"
+        if os.path.exists(news_dir):
+            files = [f for f in os.listdir(news_dir) if f.endswith('.json')]
+            for f_name in files[:5]:
+                with open(os.path.join(news_dir, f_name), "r") as f:
+                    art = json.load(f)
+                with st.expander(f"📰 {art['title']} (Source: {art['source']})"):
+                    st.write(art['content'])
+                    st.markdown(f"[Original Link]({art['url']})")
+    with col_n2:
+        st.subheader("Publishing Source Distribution")
+        source_counts = df_nlp_scores['source'].value_counts().reset_index()
+        source_counts.columns = ['Source', 'Count']
+        fig_sources = px.pie(source_counts, values='Count', names='Source', title="Articles by Publisher", template="plotly_dark")
+        st.plotly_chart(fig_sources, use_container_width=True)
+
+elif page == "🧠 Sentiment Intelligence" and df_nlp_scores is not None:
+    st.title("🧠 Behavioral Sentiment Intelligence")
+    col_s1, col_s2 = st.columns([1, 1.2])
+    with col_s1:
+        st.subheader("Sentiment Class Ratio")
+        sent_counts = df_nlp_scores['sentiment_class'].value_counts().reset_index()
+        sent_counts.columns = ['Sentiment', 'Count']
+        fig_ratio = px.pie(sent_counts, values='Count', names='Sentiment', color='Sentiment',
+                           color_discrete_map={'Bullish': '#2ecc71', 'Neutral': '#95a5a6', 'Bearish': '#e74c3c'},
+                           title="Bullish vs Bearish Ratio", template="plotly_dark")
+        st.plotly_chart(fig_ratio, use_container_width=True)
+    with col_s2:
+        st.subheader("Continuous Sentiment Momentum & Divergence Ratios")
+        if df_nlp_trends is not None and not df_nlp_trends.empty:
+            fig_trend = px.line(df_nlp_trends, x='date', y=['sentiment_momentum', 'divergence'], title="7-Day Rolling Sentiment Momentum vs Price Divergence", template="plotly_dark")
+            st.plotly_chart(fig_trend, use_container_width=True)
+
+elif page == "💬 Topic Intelligence" and df_nlp_topics is not None:
+    st.title("💬 Unsupervised Topic Intelligence")
+    col_t1, col_t2 = st.columns([1.2, 1])
+    with col_t1:
+        st.subheader("Dominant Topic Clusters Frequency")
+        topic_counts = df_nlp_topics['topic_theme'].value_counts().reset_index()
+        topic_counts.columns = ['Topic Theme', 'Article Count']
+        fig_top_freq = px.bar(topic_counts, x='Article Count', y='Topic Theme', orientation='h', title="Extracted Themes Density Index", color='Article Count', color_continuous_scale='Blues', template="plotly_dark")
+        st.plotly_chart(fig_top_freq, use_container_width=True)
+    with col_t2:
+        st.subheader("Temporal Topic Distribution / Influx")
+        df_nlp_topics['date_only'] = pd.to_datetime(df_nlp_topics['published_date']).dt.strftime('%m-%d')
+        df_topic_evol = df_nlp_topics.groupby(['date_only', 'topic_theme']).size().reset_index(name='count')
+        fig_evol = px.area(df_topic_evol, x='date_only', y='count', color='topic_theme', title="Chronological Topic Evolution & Influx", template="plotly_dark")
+        st.plotly_chart(fig_evol, use_container_width=True)
+
+elif page == "👥 Entity Intelligence" and df_nlp_entities is not None:
+    st.title("👥 Entity Extraction & Sentiment Association Ledger")
+    col_e1, col_e2 = st.columns(2)
+    with col_e1:
+        st.subheader("Top Extracted Entities Frequency Index")
+        ent_counts = df_nlp_entities.groupby(['entity', 'entity_type']).size().reset_index(name='frequency').sort_values('frequency', ascending=False)
+        fig_ents = px.bar(ent_counts.head(15), x='frequency', y='entity', color='entity_type', orientation='h', title="Top 15 Extracted Named Entities", template="plotly_dark")
+        st.plotly_chart(fig_ents, use_container_width=True)
+    with col_e2:
+        st.subheader("Sentiment Co-Occurrence Association Ratios")
+        ent_sent = df_nlp_entities.groupby('entity')['sentiment_association'].mean().reset_index().sort_values('sentiment_association', ascending=False)
+        fig_ent_sent = px.bar(ent_sent.head(10).append(ent_sent.tail(10)), x='sentiment_association', y='entity', color='sentiment_association', color_continuous_scale=px.colors.diverging.RdYlGn, orientation='h', title="Extracted Entity Sentiment Biases", template="plotly_dark")
+        st.plotly_chart(fig_ent_sent, use_container_width=True)
+
+elif page == "💥 Market Impact Dashboard" and df_nlp_impact is not None:
+    st.title("💥 Market Impact & Behavioral Risk Dashboard")
+    df_critical_ledger = df_nlp_impact[df_nlp_impact['market_impact_score'] >= 50.0].copy().sort_values('market_impact_score', ascending=False)
+    if not df_critical_ledger.empty:
+        df_disp_ledger = df_critical_ledger[['title', 'market_impact_score', 'market_impact_class', 'sentiment_score', 'source']].copy()
+        st.dataframe(df_disp_ledger, use_container_width=True)
 else:
-    st.error("Could not load data.")
+    st.error("Intelligence assets missing. Check pipeline logs.")
