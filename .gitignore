@@ -32,5 +32,8 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 
-# Ignore locally generated model binaries (optional - uncomment if you prefer to re-train on-the-fly)
-# data/results/profitable_trade_model.pkl
+# Medallion Lakehouse Big Data Layers
+data/bronze/
+data/silver/
+data/gold/
+
