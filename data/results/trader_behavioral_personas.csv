@@ -1,0 +1,3 @@
+Account,fomo_bias,panic_bias,overconfidence_bias,loss_chasing_bias,behavioral_risk_score,trader_archetype,total_realized_pnl,win_rate,avg_leverage,avg_trade_size,trade_count
+Account_A,0,0,0,1,40.0,Systematic Trader,400.0,0.6,7.0,8000.0,5
+Account_B,0,0,0,1,40.0,Systematic Trader,600.0,0.8,7.0,9000.0,5

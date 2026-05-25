@@ -1,0 +1,37 @@
+{
+    "news_ingestion": {
+        "execution_time_seconds": 3.470939874649048,
+        "records_processed": 50,
+        "last_run_timestamp": 1779719505.0568306
+    },
+    "text_preprocessing": {
+        "execution_time_seconds": 0.7201144695281982,
+        "records_processed": 6,
+        "last_run_timestamp": 1779719505.8722334
+    },
+    "sentiment_engine": {
+        "execution_time_seconds": 0.020822525024414062,
+        "records_processed": 10,
+        "last_run_timestamp": 1779719506.6441522
+    },
+    "topic_modeling": {
+        "execution_time_seconds": 0.03233504295349121,
+        "records_processed": 10,
+        "last_run_timestamp": 1779719508.561075
+    },
+    "entity_extraction": {
+        "execution_time_seconds": 3.466097116470337,
+        "records_processed": 41,
+        "last_run_timestamp": 1779719515.315267
+    },
+    "impact_scoring": {
+        "execution_time_seconds": 0.02841353416442871,
+        "records_processed": 10,
+        "last_run_timestamp": 1779719516.439849
+    },
+    "sentiment_trends": {
+        "execution_time_seconds": 0.9029922485351562,
+        "records_processed": 3,
+        "last_run_timestamp": 1779719518.0406096
+    }
+}

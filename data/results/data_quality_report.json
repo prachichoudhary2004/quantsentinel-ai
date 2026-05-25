@@ -1,0 +1,35 @@
+{
+    "overall_passed": false,
+    "null_checks": {
+        "passed": true,
+        "null_counts": {
+            "Account": 0,
+            "Trade ID": 0,
+            "Size USD": 0,
+            "Closed PnL": 0
+        }
+    },
+    "duplicate_checks": {
+        "passed": false,
+        "duplicate_count": 208414,
+        "message": "Found 208414 duplicate Trade IDs"
+    },
+    "schema_checks": {
+        "passed": false,
+        "mismatches": [
+            "Column 'Trade ID': Expected int, got float64"
+        ],
+        "message": "Schema mismatch detected"
+    },
+    "outlier_checks": {
+        "closed_pnl_outliers": 854,
+        "size_usd_outliers": 1525
+    },
+    "sentiment_drift": {
+        "drift_detected": false,
+        "baseline_mean": 53.53704279839844,
+        "recent_mean": 47.247759121323064,
+        "mean_difference": 6.289283677075375,
+        "message": "No significant sentiment drift detected"
+    }
+}
