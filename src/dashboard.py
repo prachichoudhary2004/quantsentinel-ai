@@ -96,7 +96,13 @@ def load_gold_regimes():
 @st.cache_data
 def load_gold_portfolio_sim():
     if os.path.exists("data/gold/portfolio_simulations.csv"):
-        return pd.read_csv("data/gold/portfolio_simulations.csv")
+        df = pd.read_csv("data/gold/portfolio_simulations.csv")
+        # Forward-fill and backfill NaNs to prevent disjointed lines
+        df = df.ffill().bfill()
+        # Downsample to ~1000 data points to optimize browser Plotly rendering performance
+        if len(df) > 1000:
+            df = df.iloc[::max(1, len(df) // 1000)].copy()
+        return df
     return None
 
 @st.cache_data
@@ -558,7 +564,7 @@ elif page == "👥 Entity Intelligence" and df_nlp_entities is not None:
     with col_e2:
         st.subheader("Sentiment Co-Occurrence Association Ratios")
         ent_sent = df_nlp_entities.groupby('entity')['sentiment_association'].mean().reset_index().sort_values('sentiment_association', ascending=False)
-        fig_ent_sent = px.bar(ent_sent.head(10).append(ent_sent.tail(10)), x='sentiment_association', y='entity', color='sentiment_association', color_continuous_scale=px.colors.diverging.RdYlGn, orientation='h', title="Extracted Entity Sentiment Biases", template="plotly_dark")
+        fig_ent_sent = px.bar(pd.concat([ent_sent.head(10), ent_sent.tail(10)]), x='sentiment_association', y='entity', color='sentiment_association', color_continuous_scale=px.colors.diverging.RdYlGn, orientation='h', title="Extracted Entity Sentiment Biases", template="plotly_dark")
         st.plotly_chart(fig_ent_sent, use_container_width=True)
 
 elif page == "💥 Market Impact Dashboard" and df_nlp_impact is not None:
